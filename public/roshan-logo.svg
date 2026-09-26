@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <rect width="200" height="200" fill="#000000" rx="16" />
+  <g id="glasses-emblem">
+    <!-- Left Round Rim -->
+    <circle cx="78" cy="62" r="16.5" stroke="#FDC700" stroke-width="4.8" fill="none" />
+    <!-- Right Round Rim -->
+    <circle cx="122" cy="62" r="16.5" stroke="#FDC700" stroke-width="4.8" fill="none" />
+    <!-- Bridge -->
+    <path d="M 94.5 61 C 97 57.5, 103 57.5, 105.5 61" stroke="#FDC700" stroke-width="4.8" stroke-linecap="round" fill="none" />
+    <!-- Left Temple Stub -->
+    <line x1="61.5" y1="62" x2="55" y2="62" stroke="#FDC700" stroke-width="4.5" stroke-linecap="round" />
+    <!-- Right Temple Stub -->
+    <line x1="138.5" y1="62" x2="145" y2="62" stroke="#FDC700" stroke-width="4.5" stroke-linecap="round" />
+    <!-- Gentle Curved Horizon Arc Underneath -->
+    <path d="M 48 85 C 75 75, 125 75, 152 85 C 125 79, 75 79, 48 85 Z" fill="#FDC700" />
+  </g>
+  <!-- ROSHAN Typography -->
+  <text x="100" y="122" font-family="'Outfit', 'Impact', 'Arial Black', sans-serif" font-weight="900" font-size="28" fill="#FFFFFF" text-anchor="middle" letter-spacing="3.5">ROSHAN</text>
+  <!-- CHASMA GHAR Typography -->
+  <text x="100" y="141" font-family="'DM Sans', sans-serif" font-weight="600" font-size="8.5" fill="#E5D5B5" text-anchor="middle" letter-spacing="4.5">CHASMA GHAR</text>
+</svg>

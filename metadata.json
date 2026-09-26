@@ -1,0 +1,6 @@
+{
+  "name": "Roshan Chasma Ghar - Opticians & Vision Care",
+  "description": "Handcrafted lightweight optical frames, designer sunglasses, computerized blue-cut lenses and certified optometry vision care since 1982.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

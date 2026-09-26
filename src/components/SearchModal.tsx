@@ -35,7 +35,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     : products.slice(0, 4);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 pt-6 sm:p-4 sm:pt-20 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
         {/* Search Input Bar */}
         <div className="p-4 border-b border-slate-200 flex items-center gap-3 bg-slate-50">

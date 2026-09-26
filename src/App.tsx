@@ -21,6 +21,7 @@ import { WishlistDrawer } from './components/WishlistDrawer';
 import { AuthProvider } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
 import { UserAccountDrawer } from './components/UserAccountDrawer';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { fetchProducts } from './services/supabaseService';
 import { Check, Sparkles } from 'lucide-react';
 
@@ -217,7 +218,7 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen flex flex-col bg-[#fbf8ff] text-[#1b1b20]">
+      <div className="min-h-screen flex flex-col bg-[#fbf8ff] text-[#1b1b20] pb-16 lg:pb-0">
         {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#121217] text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-semibold border border-white/10 animate-in slide-in-from-bottom-5">
@@ -321,6 +322,14 @@ export default function App() {
       {/* Global Footer */}
       <Footer
         onNavigate={handleNavigate}
+        onOpenBookEyeTest={() => setBookEyeTestOpen(true)}
+      />
+
+      {/* Mobile Bottom Navigation Bar (1-Thumb Mobile Experience) */}
+      <MobileBottomNav
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        cartCount={cart.reduce((a, b) => a + b.quantity, 0)}
         onOpenBookEyeTest={() => setBookEyeTestOpen(true)}
       />
 

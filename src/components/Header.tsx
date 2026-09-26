@@ -44,8 +44,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-[#121217] text-white border-b border-white/10 select-none shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Zone 1: Brand Wordmark */}
           <BrandLogo
             size="md"
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           {/* Zone 3: Actions (Search, Wishlist, Bag, Profile, Book Eye Test) */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             {/* Search */}
             <button
               onClick={onOpenSearch}
@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="Search Catalog"
               title="Search styles, materials, shapes"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 sm:w-4 sm:h-4" />
             </button>
 
             {/* Wishlist */}
@@ -131,10 +131,10 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
 
-            {/* Primary Action Button: BOOK EYE TEST */}
+            {/* Primary Action Button: BOOK EYE TEST (Tablet & Desktop) */}
             <button
               onClick={onOpenBookEyeTest}
-              className="py-2.5 px-3.5 sm:px-5 bg-[#e01a76] hover:bg-[#b7005d] text-white font-display text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all whitespace-nowrap active:scale-95"
+              className="hidden sm:inline-flex py-2.5 px-3.5 sm:px-5 bg-[#e01a76] hover:bg-[#b7005d] text-white font-display text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all whitespace-nowrap active:scale-95"
             >
               BOOK EYE TEST
             </button>
@@ -142,10 +142,10 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors ml-1"
+              className="lg:hidden p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors ml-0.5"
               aria-label="Toggle Navigation"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 text-amber-400" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>

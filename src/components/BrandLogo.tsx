@@ -19,32 +19,32 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
   // Badge dimensions
   const badgeSize = {
-    sm: 'w-9 h-9',
-    md: 'w-11 h-11 sm:w-12 sm:h-12',
-    lg: 'w-14 h-14 sm:w-16 sm:h-16',
-    xl: 'w-20 h-20 sm:w-24 sm:h-24',
+    sm: 'w-8 h-8 sm:w-9 sm:h-9',
+    md: 'w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12',
+    lg: 'w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16',
+    xl: 'w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24',
   }[size];
 
   // Title styling
   const titleClass = {
-    sm: 'text-sm font-black tracking-tight',
-    md: 'text-base sm:text-lg font-black tracking-tight leading-none',
-    lg: 'text-xl sm:text-2xl font-black tracking-tight leading-none',
-    xl: 'text-2xl sm:text-3xl font-black tracking-tight leading-none',
+    sm: 'text-xs sm:text-sm font-black tracking-tight',
+    md: 'text-sm sm:text-base md:text-lg font-black tracking-tight leading-none',
+    lg: 'text-lg sm:text-xl md:text-2xl font-black tracking-tight leading-none',
+    xl: 'text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-none',
   }[size];
 
   const subClass = {
-    sm: 'text-[8px] tracking-[0.2em]',
-    md: 'text-[9px] sm:text-[10px] tracking-[0.24em]',
-    lg: 'text-[11px] sm:text-xs tracking-[0.26em]',
-    xl: 'text-xs sm:text-sm tracking-[0.28em]',
+    sm: 'text-[7px] tracking-[0.14em]',
+    md: 'text-[7.5px] sm:text-[9px] tracking-[0.16em] sm:tracking-[0.24em]',
+    lg: 'text-[9px] sm:text-xs tracking-[0.2em] sm:tracking-[0.26em]',
+    xl: 'text-[10px] sm:text-sm tracking-[0.22em] sm:tracking-[0.28em]',
   }[size];
 
   const tagClass = {
-    sm: 'text-[7px] tracking-[0.12em]',
-    md: 'text-[8px] tracking-[0.16em]',
-    lg: 'text-[9px] tracking-[0.18em]',
-    xl: 'text-[10px] tracking-[0.2em]',
+    sm: 'hidden sm:block text-[7px] tracking-[0.12em]',
+    md: 'hidden sm:block text-[8px] tracking-[0.16em]',
+    lg: 'hidden sm:block text-[9px] tracking-[0.18em]',
+    xl: 'text-[9px] sm:text-[10px] tracking-[0.2em]',
   }[size];
 
   const isDark = variant === 'dark';
@@ -52,7 +52,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center gap-3 select-none ${
+      className={`inline-flex items-center gap-2 sm:gap-3 select-none ${
         onClick ? 'cursor-pointer group' : ''
       } ${className}`}
     >

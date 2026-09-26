@@ -105,7 +105,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
         </button>
 
         {/* Left Side: Virtual Mirror Viewport */}
-        <div className="relative md:w-3/5 bg-slate-900 flex items-center justify-center overflow-hidden min-h-[380px] md:min-h-[500px]">
+        <div className="relative md:w-3/5 bg-slate-900 flex items-center justify-center overflow-hidden h-64 sm:h-80 md:min-h-[500px] md:h-auto shrink-0">
           {useWebcam ? (
             <video
               ref={videoRef}

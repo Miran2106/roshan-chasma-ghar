@@ -41,25 +41,25 @@ export const UserAccountDrawer: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-xl bg-[#121217] text-white shadow-2xl border-l border-white/10 flex flex-col">
           {/* Header */}
-          <div className="p-6 border-b border-white/10 bg-[#1b1b22] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#e01a76] to-amber-400 p-0.5 shadow-md">
+          <div className="p-4 sm:p-6 border-b border-white/10 bg-[#1b1b22] flex items-center justify-between">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-[#e01a76] to-amber-400 p-0.5 shadow-md">
                 <div className="w-full h-full bg-[#121217] rounded-2xl flex items-center justify-center">
-                  <User className="w-5 h-5 text-amber-300" />
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300" />
                 </div>
               </div>
               <div>
-                <h3 className="font-display font-bold text-lg text-white">
+                <h3 className="font-display font-bold text-base sm:text-lg text-white">
                   {profile?.full_name || user?.email?.split('@')[0] || 'Valued Patron'}
                 </h3>
-                <p className="text-xs text-slate-400">{user?.email || 'Guest Session'}</p>
+                <p className="text-[11px] sm:text-xs text-slate-400 truncate max-w-[180px] sm:max-w-none">{user?.email || 'Guest Session'}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={signOut}
                 title="Sign Out"
@@ -76,8 +76,8 @@ export const UserAccountDrawer: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex border-b border-white/10 bg-[#16161c] px-4">
+          {/* Navigation Tabs (Scrollable on mobile) */}
+          <div className="flex border-b border-white/10 bg-[#16161c] px-2 sm:px-4 overflow-x-auto no-scrollbar flex-nowrap whitespace-nowrap">
             <button
               onClick={() => setActiveTab('orders')}
               className={`py-3 px-3 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${

@@ -178,15 +178,15 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
             Explore handcrafted lightweight optical frames, designer sunglasses, and computerized blue-cut lenses crafted for pure visual clarity.
           </p>
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
+          {/* Category Tabs (Smooth Horizontal Scroll on Mobile) */}
+          <div className="flex items-center gap-2 pt-4 overflow-x-auto no-scrollbar flex-nowrap px-1 sm:justify-center">
             {categories.map((cat) => {
               const isActive = selectedCategory === cat.id;
               return (
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`py-2 px-4 text-xs font-semibold rounded-full transition-all ${
+                  className={`py-2 px-3.5 sm:px-4 text-xs font-semibold rounded-full transition-all shrink-0 whitespace-nowrap ${
                     isActive
                       ? 'bg-[#e01a76] text-white shadow-sm'
                       : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
@@ -494,7 +494,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-6">
                 {filteredProducts.slice(0, visibleCount).map((prod) => {
                   const isWishlisted = wishlistIds.includes(prod.id);
                   return (
@@ -503,9 +503,9 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                       className="group bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden relative"
                     >
                       {/* Badge & Heart */}
-                      <div className="p-4 flex items-center justify-between z-10">
+                      <div className="p-2.5 sm:p-4 flex items-center justify-between z-10">
                         <span
-                          className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                          className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md truncate max-w-[85px] sm:max-w-none ${
                             prod.badgeType === 'gold'
                               ? 'bg-amber-100 text-amber-900 border border-amber-200'
                               : prod.badgeType === 'pink'
@@ -518,17 +518,17 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
 
                         <button
                           onClick={() => onToggleWishlist(prod)}
-                          className="p-1.5 rounded-full text-slate-400 hover:text-[#e01a76] hover:bg-pink-50 transition-colors"
+                          className="p-1 sm:p-1.5 rounded-full text-slate-400 hover:text-[#e01a76] hover:bg-pink-50 transition-colors"
                           aria-label="Save frame"
                         >
-                          <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-[#e01a76] text-[#e01a76]' : ''}`} />
+                          <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-[#e01a76] text-[#e01a76]' : ''}`} />
                         </button>
                       </div>
 
                       {/* Optical SVG Display */}
                       <div
                         onClick={() => onQuickView(prod)}
-                        className="cursor-pointer px-4 py-4 aspect-[4/3] flex items-center justify-center bg-slate-50/50 group-hover:bg-slate-50 transition-colors"
+                        className="cursor-pointer px-2 sm:px-4 py-2 sm:py-4 aspect-[4/3] flex items-center justify-center bg-slate-50/50 group-hover:bg-slate-50 transition-colors"
                       >
                         <FrameGraphic
                           shape={prod.shape}
@@ -539,43 +539,43 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                       </div>
 
                       {/* Meta & Buttons */}
-                      <div className="p-5 text-center space-y-2">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block font-display">
+                      <div className="p-2.5 sm:p-5 text-center space-y-1 sm:space-y-2">
+                        <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider text-slate-400 block font-display">
                           {prod.shapeLabel}
                         </span>
 
                         <h3
                           onClick={() => onNavigate('product', prod.id)}
-                          className="text-sm font-bold text-slate-900 cursor-pointer hover:text-[#e01a76] transition-colors truncate"
+                          className="text-xs sm:text-sm font-bold text-slate-900 cursor-pointer hover:text-[#e01a76] transition-colors truncate"
                         >
                           {prod.name}
                         </h3>
 
-                        <p className="text-[11px] text-slate-500">
-                          Size: {prod.sizeCategory} ({prod.dimensions.lensWidth}-{prod.dimensions.bridge}-{prod.dimensions.temple})
+                        <p className="text-[10px] sm:text-[11px] text-slate-500">
+                          {prod.sizeCategory} · {prod.dimensions.lensWidth}-{prod.dimensions.bridge}
                         </p>
 
-                        <div className="flex items-center justify-center gap-2 pt-1">
-                          <span className="text-base font-bold text-slate-900 font-display">
+                        <div className="flex items-center justify-center gap-1.5 sm:gap-2 pt-0.5">
+                          <span className="text-xs sm:text-base font-bold text-slate-900 font-display">
                             ₹{prod.price.toLocaleString()}
                           </span>
                           {prod.originalPrice > prod.price && (
-                            <span className="text-xs text-slate-400 line-through">
+                            <span className="text-[10px] sm:text-xs text-slate-400 line-through">
                               ₹{prod.originalPrice.toLocaleString()}
                             </span>
                           )}
                         </div>
 
-                        <div className="pt-3 flex items-center gap-2">
+                        <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
                           <button
                             onClick={() => onQuickView(prod)}
-                            className="flex-1 py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors"
+                            className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] sm:text-xs font-semibold rounded-lg transition-colors"
                           >
                             QUICK VIEW
                           </button>
                           <button
                             onClick={() => onAddToCart(prod)}
-                            className="flex-1 py-2 px-3 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs"
+                            className="flex-1 py-1.5 px-2 sm:px-3 bg-[#e01a76] hover:bg-[#b7005d] text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs whitespace-nowrap"
                           >
                             BUY NOW
                           </button>

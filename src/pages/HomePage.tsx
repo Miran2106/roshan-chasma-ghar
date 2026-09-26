@@ -104,21 +104,21 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-slate-900 leading-[1.08] text-balance">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-slate-900 leading-[1.12] text-balance">
               WELCOME TO <br />
               <span className="text-slate-900">ROSHAN </span>
               <span className="text-[#e01a76]">CHASMA GHAR</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+            <p className="text-xs sm:text-base text-slate-600 leading-relaxed max-w-xl">
               {currentEdition.subtitle}
             </p>
 
             {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
               <button
                 onClick={() => onNavigate('catalog')}
-                className="py-3 px-6 bg-[#121217] hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm hover:shadow flex items-center gap-2 group"
+                className="py-3 px-6 bg-[#121217] hover:bg-slate-800 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 group"
               >
                 <span>SHOP EYEWEAR</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -126,7 +126,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <button
                 onClick={onOpenBookEyeTest}
-                className="py-3 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm hover:shadow"
+                className="py-3 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm hover:shadow text-center"
               >
                 BOOK EYE TEST
               </button>
@@ -257,8 +257,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           </p>
         </div>
 
-        {/* 8 Product Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 8 Product Cards Grid (2 cols on mobile, 4 on desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {featuredFrames.map((prod) => {
             const isWishlisted = wishlistIds.includes(prod.id);
             return (
@@ -267,9 +267,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="group bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden relative"
               >
                 {/* Top Badge & Heart Wishlist */}
-                <div className="p-4 flex items-center justify-between z-10">
+                <div className="p-2.5 sm:p-4 flex items-center justify-between z-10">
                   <span
-                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                    className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md truncate max-w-[85px] sm:max-w-none ${
                       prod.badgeType === 'gold'
                         ? 'bg-amber-100 text-amber-900 border border-amber-200'
                         : prod.badgeType === 'pink'
@@ -282,17 +282,17 @@ export const HomePage: React.FC<HomePageProps> = ({
 
                   <button
                     onClick={() => onToggleWishlist(prod)}
-                    className="p-1.5 rounded-full text-slate-400 hover:text-[#e01a76] hover:bg-pink-50 transition-colors"
+                    className="p-1 sm:p-1.5 rounded-full text-slate-400 hover:text-[#e01a76] hover:bg-pink-50 transition-colors"
                     aria-label="Save to wishlist"
                   >
-                    <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-[#e01a76] text-[#e01a76]' : ''}`} />
+                    <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-[#e01a76] text-[#e01a76]' : ''}`} />
                   </button>
                 </div>
 
                 {/* Eyewear SVG Silhouette Display */}
                 <div
                   onClick={() => onQuickView(prod)}
-                  className="cursor-pointer px-4 py-2 aspect-[4/3] flex items-center justify-center"
+                  className="cursor-pointer px-2 sm:px-4 py-1 sm:py-2 aspect-[4/3] flex items-center justify-center"
                 >
                   <FrameGraphic
                     shape={prod.shape}
@@ -303,36 +303,36 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </div>
 
                 {/* Card Bottom Meta & Actions */}
-                <div className="p-4 pt-0 text-center space-y-2">
+                <div className="p-2.5 sm:p-4 pt-0 text-center space-y-1.5 sm:space-y-2">
                   <h3
                     onClick={() => onNavigate('product', prod.id)}
-                    className="text-xs font-bold text-slate-900 cursor-pointer hover:text-[#e01a76] transition-colors truncate"
+                    className="text-xs sm:text-sm font-bold text-slate-900 cursor-pointer hover:text-[#e01a76] transition-colors truncate"
                   >
                     {prod.name}
                   </h3>
 
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="text-sm font-bold text-slate-900 font-display">
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                    <span className="text-xs sm:text-sm font-bold text-slate-900 font-display">
                       ₹{prod.price.toLocaleString()}
                     </span>
                     {prod.originalPrice > prod.price && (
-                      <span className="text-[11px] text-slate-400 line-through">
+                      <span className="text-[10px] sm:text-[11px] text-slate-400 line-through">
                         ₹{prod.originalPrice.toLocaleString()}
                       </span>
                     )}
                   </div>
 
-                  <div className="pt-2 flex items-center gap-1.5">
+                  <div className="pt-1.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5">
                     <button
                       onClick={() => onOpenVirtualTryOn(prod)}
-                      className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold rounded-lg transition-colors flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] sm:text-[11px] font-semibold rounded-lg transition-colors flex items-center justify-center gap-1"
                     >
                       <Eye className="w-3 h-3 text-[#e01a76]" />
                       <span>Try On</span>
                     </button>
                     <button
                       onClick={() => onAddToCart(prod)}
-                      className="flex-1 py-1.5 px-3 bg-[#e01a76] hover:bg-[#b7005d] text-white text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs"
+                      className="flex-1 py-1.5 px-2 sm:px-3 bg-[#e01a76] hover:bg-[#b7005d] text-white text-[10px] sm:text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs whitespace-nowrap"
                     >
                       BUY NOW
                     </button>

@@ -105,10 +105,11 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
 
             {/* Central Graphic / Perspective */}
             <div className="w-full max-w-md my-auto aspect-[16/9] flex items-center justify-center p-2 overflow-hidden">
-              {activeColorObj.image || product.image ? (
+              {product.image || activeColorObj.image ? (
                 <img
-                  src={activeColorObj.image || product.image}
+                  src={product.image || activeColorObj.image}
                   alt={product.name}
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-contain filter drop-shadow-md transition-transform duration-300 hover:scale-105"
                 />
               ) : (

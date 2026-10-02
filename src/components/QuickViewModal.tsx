@@ -58,10 +58,11 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
           </div>
 
           <div className="my-8 w-full max-w-xs aspect-[4/3] flex items-center justify-center overflow-hidden">
-            {activeColorObj.image || product.image ? (
+            {product.image || activeColorObj.image ? (
               <img
-                src={activeColorObj.image || product.image}
+                src={product.image || activeColorObj.image}
                 alt={product.name}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-contain"
               />
             ) : (

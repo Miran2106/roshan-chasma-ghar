@@ -300,6 +300,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <img
                       src={prod.image || prod.colors[0]?.image}
                       alt={prod.name}
+                      referrerPolicy="no-referrer"
                       className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (

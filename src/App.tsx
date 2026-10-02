@@ -11,6 +11,7 @@ import { ClinicPage } from './pages/ClinicPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { OffersPage } from './pages/OffersPage';
+import { AdminPage } from './pages/AdminPage';
 import { VirtualTryOnModal } from './components/VirtualTryOnModal';
 import { BookEyeTestModal } from './components/BookEyeTestModal';
 import { QuickViewModal } from './components/QuickViewModal';
@@ -23,11 +24,104 @@ import { AuthModal } from './components/AuthModal';
 import { UserAccountDrawer } from './components/UserAccountDrawer';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { fetchProducts } from './services/supabaseService';
-import { Check, Sparkles } from 'lucide-react';
+import { Check, Sparkles, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>('home');
   const [selectedProductId, setSelectedProductId] = useState<string>('aurelia-titanium-round');
+
+  // Dynamic products state with local persistence (editable in Admin Console)
+  const [products, setProducts] = useState<EyewearProduct[]>(() => {
+    const saved = localStorage.getItem('roshan_custom_products');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Merge with PRODUCTS to guarantee all high-res photos are present even if old cache lacked them!
+          return PRODUCTS.map((fresh) => {
+            const userEdit = parsed.find((p: any) => p.id === fresh.id);
+            if (!userEdit) return fresh;
+            return {
+              ...fresh,
+              ...userEdit,
+              // If user edited the price, keep user price:
+              price: userEdit.price !== undefined ? userEdit.price : fresh.price,
+              originalPrice: userEdit.originalPrice !== undefined ? userEdit.originalPrice : fresh.originalPrice,
+              discountPercent: userEdit.discountPercent !== undefined ? userEdit.discountPercent : fresh.discountPercent,
+              // Always ensure custom image is master for both product and all color variants:
+              image: userEdit.image || fresh.image,
+              colors: fresh.colors.map((c, idx) => ({
+                ...c,
+                image: userEdit.image || userEdit.colors?.[idx]?.image || c.image || fresh.image,
+              })),
+            };
+          });
+        }
+      } catch (err) {
+        console.warn('Could not parse saved products:', err);
+      }
+    }
+    return PRODUCTS;
+  });
+
+  // Keep local storage updated
+  useEffect(() => {
+    localStorage.setItem('roshan_custom_products', JSON.stringify(products));
+  }, [products]);
+
+  const handleUpdateProduct = (updated: EyewearProduct) => {
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (p.id === updated.id) {
+          const finalImg = updated.image?.trim() || undefined;
+          const updatedColors = p.colors.map((c) => ({
+            ...c,
+            image: finalImg || c.image,
+          }));
+          return {
+            ...p,
+            ...updated,
+            image: finalImg,
+            colors: updatedColors,
+          };
+        }
+        return p;
+      })
+    );
+    showToast(`Updated ${updated.name}`);
+  };
+
+  const handleUpdateAllProductImages = (newImageUrl: string) => {
+    const finalImg = newImageUrl.trim();
+    if (!finalImg) return;
+    setProducts((prev) =>
+      prev.map((p) => ({
+        ...p,
+        image: finalImg,
+        colors: p.colors.map((c) => ({
+          ...c,
+          image: finalImg,
+        })),
+      }))
+    );
+    showToast(`Applied new image to all frames`);
+  };
+
+  const handleAddProduct = (newProd: EyewearProduct) => {
+    setProducts((prev) => [newProd, ...prev]);
+    showToast(`Added ${newProd.name} to catalog`);
+  };
+
+  const handleDeleteProduct = (productId: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== productId));
+    showToast('Product removed from catalog');
+  };
+
+  const handleResetFactoryProducts = () => {
+    localStorage.removeItem('roshan_custom_products');
+    setProducts(PRODUCTS);
+    showToast('Catalog restored to showroom default');
+  };
 
   // Initial cart items matching Image 5 (Aurelia Sovereign Round + Kallan Pantoscopic Acetate)
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -212,9 +306,9 @@ export default function App() {
     }
   };
 
-  const wishlistProducts = PRODUCTS.filter((p) => wishlistIds.includes(p.id));
+  const wishlistProducts = products.filter((p) => wishlistIds.includes(p.id));
   const activeProduct =
-    PRODUCTS.find((p) => p.id === selectedProductId) || PRODUCTS[0];
+    products.find((p) => p.id === selectedProductId) || products[0];
 
   return (
     <AuthProvider>
@@ -244,7 +338,7 @@ export default function App() {
       <main className="flex-1">
         {currentPage === 'home' && (
           <HomePage
-            products={PRODUCTS}
+            products={products}
             onNavigate={handleNavigate}
             onOpenBookEyeTest={() => setBookEyeTestOpen(true)}
             onQuickView={(p) => setQuickViewProduct(p)}
@@ -257,7 +351,7 @@ export default function App() {
 
         {currentPage === 'catalog' && (
           <CatalogPage
-            products={PRODUCTS}
+            products={products}
             onNavigate={handleNavigate}
             onQuickView={(p) => setQuickViewProduct(p)}
             onOpenVirtualTryOn={(p) => setVirtualTryOnProduct(p)}
@@ -272,7 +366,7 @@ export default function App() {
         {currentPage === 'product' && (
           <ProductDetailPage
             product={activeProduct}
-            allProducts={PRODUCTS}
+            allProducts={products}
             onNavigate={handleNavigate}
             onAddToCart={handleAddToCart}
             onOpenVirtualTryOn={(p) => setVirtualTryOnProduct(p)}
@@ -315,6 +409,19 @@ export default function App() {
             onNavigate={handleNavigate}
             onOpenHomeTryOn={() => setHomeTryOnOpen(true)}
             onOpenBookEyeTest={() => setBookEyeTestOpen(true)}
+          />
+        )}
+
+        {currentPage === 'admin' && (
+          <AdminPage
+            products={products}
+            onUpdateProduct={handleUpdateProduct}
+            onUpdateAllProductImages={handleUpdateAllProductImages}
+            onAddProduct={handleAddProduct}
+            onDeleteProduct={handleDeleteProduct}
+            onResetFactoryProducts={handleResetFactoryProducts}
+            onNavigate={handleNavigate}
+            onQuickView={(p) => setQuickViewProduct(p)}
           />
         )}
       </main>
@@ -417,6 +524,22 @@ export default function App() {
 
       {/* Supabase User Account & Orders Drawer */}
       <UserAccountDrawer />
+
+      {/* Floating Admin Console Switcher (Always accessible on User & Admin Side) */}
+      <div className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 z-50">
+        <button
+          onClick={() => handleNavigate(currentPage === 'admin' ? 'home' : 'admin')}
+          className={`px-4 py-2.5 rounded-full font-bold text-xs shadow-2xl flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 border ${
+            currentPage === 'admin'
+              ? 'bg-slate-900 hover:bg-slate-800 text-white border-slate-700 shadow-slate-950/50'
+              : 'bg-[#e01a76] hover:bg-[#b7005d] text-white border-pink-400/40 shadow-pink-600/40'
+          }`}
+          title={currentPage === 'admin' ? 'Switch to Customer Storefront' : 'Open Store Admin Side (Change Photos & Prices)'}
+        >
+          <ShieldCheck className="w-4 h-4 text-white" />
+          <span>{currentPage === 'admin' ? '👁️ View Storefront' : '⚙️ Store Admin Side'}</span>
+        </button>
+      </div>
       </div>
     </AuthProvider>
   );

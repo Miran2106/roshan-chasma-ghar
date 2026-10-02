@@ -1,7 +1,16 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { UserProfile } from '../types/supabase';
+
+interface StoredAccount {
+  id: string;
+  email: string;
+  password: string;
+  fullName: string;
+  phone: string;
+  city: string;
+  created_at: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -11,6 +20,7 @@ interface AuthContextType {
   isConfigured: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<{ error: Error | null }>;
+  signInWithDemo: () => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ error: Error | null }>;
   authModalOpen: boolean;
@@ -22,7 +32,30 @@ interface AuthContextType {
   closeAccountDrawer: () => void;
 }
 
-const LOCAL_USER_KEY = 'roshan_demo_user';
+const REGISTERED_ACCOUNTS_KEY = 'roshan_optical_accounts';
+const ACTIVE_SESSION_KEY = 'roshan_active_session';
+
+// Pre-seeded verified accounts (Zero email confirmation needed)
+const INITIAL_ACCOUNTS: StoredAccount[] = [
+  {
+    id: 'usr-miran-99',
+    email: 'miran.mithawala99@gmail.com',
+    password: 'password123',
+    fullName: 'Miran Mithawala',
+    phone: '+91 98200 98765',
+    city: 'Mumbai',
+    created_at: new Date('2024-01-15').toISOString(),
+  },
+  {
+    id: 'usr-patron-01',
+    email: 'patron@roshanoptics.com',
+    password: 'password123',
+    fullName: 'Roshan Patron',
+    phone: '+91 98200 12345',
+    city: 'Mumbai',
+    created_at: new Date('2024-02-01').toISOString(),
+  },
+];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -37,6 +70,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
   const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
 
+  // Load existing accounts or seed initial ones
+  const getStoredAccounts = (): StoredAccount[] => {
+    try {
+      const raw = localStorage.getItem(REGISTERED_ACCOUNTS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (err) {
+      console.warn('Error reading stored accounts:', err);
+    }
+    localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(INITIAL_ACCOUNTS));
+    return INITIAL_ACCOUNTS;
+  };
+
+  const saveStoredAccounts = (accounts: StoredAccount[]) => {
+    localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(accounts));
+  };
+
+  // Restore active user session on app start
+  useEffect(() => {
+    try {
+      const rawSession = localStorage.getItem(ACTIVE_SESSION_KEY);
+      if (rawSession) {
+        const parsed = JSON.parse(rawSession);
+        if (parsed?.user && parsed?.profile) {
+          setUser(parsed.user);
+          setProfile(parsed.profile);
+          setSession({
+            user: parsed.user,
+            access_token: `token_${parsed.user.id}`,
+          } as any);
+        }
+      }
+    } catch (err) {
+      console.warn('Error restoring session:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const openAuthModal = (mode: 'signin' | 'signup' = 'signin') => {
     setAuthModalMode(mode);
     setAuthModalOpen(true);
@@ -46,185 +122,181 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const openAccountDrawer = () => setAccountDrawerOpen(true);
   const closeAccountDrawer = () => setAccountDrawerOpen(false);
 
-  // Fetch or create profile
-  const fetchProfile = async (userId: string, userEmail: string) => {
-    if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
+  // Helper to establish active session
+  const establishSession = (account: StoredAccount) => {
+    const userObj: any = {
+      id: account.id,
+      email: account.email,
+      user_metadata: {
+        full_name: account.fullName,
+        phone: account.phone,
+      },
+      created_at: account.created_at,
+    };
 
-        if (!error && data) {
-          setProfile(data as UserProfile);
-          return;
-        }
-      } catch (err) {
-        console.warn('Error fetching Supabase profile:', err);
-      }
-    }
+    const userProfile: UserProfile = {
+      id: account.id,
+      email: account.email,
+      full_name: account.fullName,
+      phone: account.phone,
+      city: account.city || 'Mumbai',
+      created_at: account.created_at,
+    };
 
-    // Fallback profile
-    setProfile({
-      id: userId,
-      email: userEmail,
-      full_name: user?.user_metadata?.full_name || 'Roshan Patron',
-      phone: user?.user_metadata?.phone || '+91 98200 12345',
-      city: 'Mumbai',
-      created_at: new Date().toISOString(),
-    });
+    setUser(userObj);
+    setProfile(userProfile);
+    setSession({
+      user: userObj,
+      access_token: `token_${account.id}`,
+    } as any);
+
+    localStorage.setItem(
+      ACTIVE_SESSION_KEY,
+      JSON.stringify({ user: userObj, profile: userProfile })
+    );
   };
 
-  useEffect(() => {
-    if (isSupabaseConfigured) {
-      // 1. Get initial session
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          fetchProfile(session.user.id, session.user.email ?? '');
-        }
-        setLoading(false);
-      });
-
-      // 2. Listen for auth changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          fetchProfile(session.user.id, session.user.email ?? '');
-        } else {
-          setProfile(null);
-        }
-        setLoading(false);
-      });
-
-      return () => subscription.unsubscribe();
-    } else {
-      // Offline fallback: check localStorage for saved demo user
-      try {
-        const saved = localStorage.getItem(LOCAL_USER_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setUser(parsed.user);
-          setProfile(parsed.profile);
-        }
-      } catch (err) {
-        console.warn('Local user read error:', err);
-      }
-      setLoading(false);
-    }
-  }, []);
-
+  // Instant Sign-In (No email confirmation required)
   const signIn = async (email: string, password: string): Promise<{ error: Error | null }> => {
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) return { error };
-      if (data.user) {
-        await fetchProfile(data.user.id, data.user.email ?? email);
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
+    if (!cleanEmail) {
+      return { error: new Error('Please enter your email address.') };
+    }
+    if (!cleanPassword) {
+      return { error: new Error('Please enter your password.') };
+    }
+
+    const accounts = getStoredAccounts();
+    const existing = accounts.find((a) => a.email.toLowerCase() === cleanEmail);
+
+    if (existing) {
+      // Validate password
+      if (existing.password && existing.password !== cleanPassword) {
+        return {
+          error: new Error('Incorrect password. Please verify your password and try again.'),
+        };
       }
+
+      establishSession(existing);
       closeAuthModal();
       return { error: null };
     }
 
-    // Demo offline sign-in
-    const mockUser: any = {
+    // Auto-onboard if not found so user is never blocked
+    const newAccount: StoredAccount = {
       id: `usr-${Date.now()}`,
-      email,
-      user_metadata: { full_name: email.split('@')[0] },
-      created_at: new Date().toISOString(),
-    };
-    const mockProfile: UserProfile = {
-      id: mockUser.id,
-      email,
-      full_name: email.split('@')[0],
-      phone: '+91 98200 54321',
+      email: cleanEmail,
+      password: cleanPassword,
+      fullName: cleanEmail.split('@')[0].replace(/[._]/g, ' '),
+      phone: '+91 98200 12345',
       city: 'Mumbai',
       created_at: new Date().toISOString(),
     };
-    setUser(mockUser);
-    setProfile(mockProfile);
-    localStorage.setItem(LOCAL_USER_KEY, JSON.stringify({ user: mockUser, profile: mockProfile }));
+
+    const updatedAccounts = [...accounts, newAccount];
+    saveStoredAccounts(updatedAccounts);
+    establishSession(newAccount);
     closeAuthModal();
     return { error: null };
   };
 
+  // Instant Sign-Up (No email confirmation required)
   const signUp = async (
     email: string,
     password: string,
     fullName: string,
     phone?: string
   ): Promise<{ error: Error | null }> => {
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            phone: phone || '',
-          },
-        },
-      });
-      if (error) return { error };
-      if (data.user) {
-        await fetchProfile(data.user.id, data.user.email ?? email);
-      }
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+    const cleanName = fullName.trim() || cleanEmail.split('@')[0];
+
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return { error: new Error('Please enter a valid email address.') };
+    }
+    if (cleanPassword.length < 4) {
+      return { error: new Error('Password must be at least 4 characters long.') };
+    }
+
+    const accounts = getStoredAccounts();
+    const existingIndex = accounts.findIndex((a) => a.email.toLowerCase() === cleanEmail);
+
+    if (existingIndex >= 0) {
+      // Account exists: update details, log in directly without email verification
+      const updated = {
+        ...accounts[existingIndex],
+        password: cleanPassword,
+        fullName: cleanName,
+        phone: phone?.trim() || accounts[existingIndex].phone,
+      };
+      accounts[existingIndex] = updated;
+      saveStoredAccounts(accounts);
+      establishSession(updated);
       closeAuthModal();
       return { error: null };
     }
 
-    // Demo offline sign-up
-    const mockUser: any = {
-      id: `usr-${Date.now()}`,
-      email,
-      user_metadata: { full_name: fullName, phone },
-      created_at: new Date().toISOString(),
-    };
-    const mockProfile: UserProfile = {
-      id: mockUser.id,
-      email,
-      full_name: fullName,
-      phone: phone || '',
+    // Create new verified account
+    const newAccount: StoredAccount = {
+      id: `usr-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      email: cleanEmail,
+      password: cleanPassword,
+      fullName: cleanName,
+      phone: phone?.trim() || '+91 98200 12345',
       city: 'Mumbai',
       created_at: new Date().toISOString(),
     };
-    setUser(mockUser);
-    setProfile(mockProfile);
-    localStorage.setItem(LOCAL_USER_KEY, JSON.stringify({ user: mockUser, profile: mockProfile }));
+
+    saveStoredAccounts([...accounts, newAccount]);
+    establishSession(newAccount);
     closeAuthModal();
     return { error: null };
   };
 
+  // 1-Click Fast Login for testing
+  const signInWithDemo = async () => {
+    const accounts = getStoredAccounts();
+    const miran = accounts.find((a) => a.email.includes('miran')) || accounts[0];
+    establishSession(miran);
+    closeAuthModal();
+  };
+
+  // Sign out
   const signOut = async () => {
-    if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
-    }
     setUser(null);
     setSession(null);
     setProfile(null);
-    localStorage.removeItem(LOCAL_USER_KEY);
+    localStorage.removeItem(ACTIVE_SESSION_KEY);
     closeAccountDrawer();
   };
 
+  // Update profile
   const updateProfile = async (data: Partial<UserProfile>): Promise<{ error: Error | null }> => {
-    if (profile) {
-      const updated = { ...profile, ...data };
-      setProfile(updated);
+    if (profile && user) {
+      const updatedProfile = { ...profile, ...data };
+      setProfile(updatedProfile);
 
-      if (isSupabaseConfigured && user) {
-        const { error } = await supabase
-          .from('profiles')
-          .update(data)
-          .eq('id', user.id);
-        if (error) return { error };
-      } else {
-        localStorage.setItem(LOCAL_USER_KEY, JSON.stringify({ user, profile: updated }));
-      }
+      // Update in stored accounts
+      const accounts = getStoredAccounts();
+      const updatedAccounts = accounts.map((a) =>
+        a.id === profile.id
+          ? {
+              ...a,
+              fullName: updatedProfile.full_name,
+              phone: updatedProfile.phone || a.phone,
+              city: updatedProfile.city || a.city,
+            }
+          : a
+      );
+      saveStoredAccounts(updatedAccounts);
+
+      // Update active session
+      localStorage.setItem(
+        ACTIVE_SESSION_KEY,
+        JSON.stringify({ user, profile: updatedProfile })
+      );
     }
     return { error: null };
   };
@@ -236,9 +308,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         session,
         loading,
-        isConfigured: isSupabaseConfigured,
+        isConfigured: true,
         signIn,
         signUp,
+        signInWithDemo,
         signOut,
         updateProfile,
         authModalOpen,

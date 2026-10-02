@@ -138,6 +138,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onOpenBookEyeTest })
                   Store Locations
                 </button>
               </li>
+              <li>
+                <button onClick={() => onNavigate('admin')} className="text-[#e01a76] hover:underline font-bold transition-colors">
+                  Store Admin Console
+                </button>
+              </li>
             </ul>
           </div>
 

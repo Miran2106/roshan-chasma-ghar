@@ -61,6 +61,7 @@ export interface EyewearProduct {
   isBlueCut?: boolean;
   frameTone: 'black' | 'brown' | 'gold' | 'silver' | 'blue' | 'crystal';
   customSvgType?: string;
+  image?: string;
 }
 
 export interface LensOption {

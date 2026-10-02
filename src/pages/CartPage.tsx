@@ -202,12 +202,20 @@ export const CartPage: React.FC<CartPageProps> = ({
                     <span className="absolute top-2 left-2 text-[9px] font-bold uppercase tracking-wider bg-white/90 px-1.5 py-0.5 rounded text-slate-700 shadow-2xs">
                       {item.product.badge || 'TITANIUM'}
                     </span>
-                    <FrameGraphic
-                      shape={item.product.shape}
-                      type={item.product.customSvgType}
-                      colorHex={item.product.colors[0]?.hex}
-                      className="w-full h-full"
-                    />
+                    {item.product.image || item.product.colors[0]?.image ? (
+                      <img
+                        src={item.product.image || item.product.colors[0]?.image}
+                        alt={item.product.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <FrameGraphic
+                        shape={item.product.shape}
+                        type={item.product.customSvgType}
+                        colorHex={item.product.colors[0]?.hex}
+                        className="w-full h-full"
+                      />
+                    )}
                   </div>
 
                   {/* Middle Info */}

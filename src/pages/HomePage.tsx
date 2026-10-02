@@ -291,17 +291,25 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </button>
                 </div>
 
-                {/* Eyewear SVG Silhouette Display */}
+                {/* Eyewear Photo or SVG Silhouette Display */}
                 <div
                   onClick={() => onQuickView(prod)}
-                  className="cursor-pointer px-2 sm:px-4 py-1 sm:py-2 aspect-[4/3] flex items-center justify-center"
+                  className="cursor-pointer px-2 sm:px-4 py-1 sm:py-2 aspect-[4/3] flex items-center justify-center overflow-hidden"
                 >
-                  <FrameGraphic
-                    shape={prod.shape}
-                    type={prod.customSvgType}
-                    colorHex={prod.colors[0].hex}
-                    className="w-full h-full"
-                  />
+                  {prod.image || prod.colors[0]?.image ? (
+                    <img
+                      src={prod.image || prod.colors[0]?.image}
+                      alt={prod.name}
+                      className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <FrameGraphic
+                      shape={prod.shape}
+                      type={prod.customSvgType}
+                      colorHex={prod.colors[0].hex}
+                      className="w-full h-full"
+                    />
+                  )}
                 </div>
 
                 {/* Card Bottom Meta & Actions */}

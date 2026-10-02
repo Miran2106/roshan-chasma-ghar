@@ -57,13 +57,21 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
             <span className="text-xs text-slate-400 font-mono">SKU: {product.sku}</span>
           </div>
 
-          <div className="my-8 w-full max-w-xs aspect-[4/3] flex items-center justify-center">
-            <FrameGraphic
-              shape={product.shape}
-              type={product.customSvgType}
-              colorHex={activeColorObj.hex}
-              className="w-full h-full"
-            />
+          <div className="my-8 w-full max-w-xs aspect-[4/3] flex items-center justify-center overflow-hidden">
+            {activeColorObj.image || product.image ? (
+              <img
+                src={activeColorObj.image || product.image}
+                alt={product.name}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <FrameGraphic
+                shape={product.shape}
+                type={product.customSvgType}
+                colorHex={activeColorObj.hex}
+                className="w-full h-full"
+              />
+            )}
           </div>
 
           <div className="w-full space-y-2">

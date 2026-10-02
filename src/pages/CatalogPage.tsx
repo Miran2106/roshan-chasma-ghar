@@ -525,17 +525,25 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                         </button>
                       </div>
 
-                      {/* Optical SVG Display */}
+                      {/* Optical Photo or SVG Display */}
                       <div
                         onClick={() => onQuickView(prod)}
-                        className="cursor-pointer px-2 sm:px-4 py-2 sm:py-4 aspect-[4/3] flex items-center justify-center bg-slate-50/50 group-hover:bg-slate-50 transition-colors"
+                        className="cursor-pointer px-2 sm:px-4 py-2 sm:py-4 aspect-[4/3] flex items-center justify-center bg-slate-50/50 group-hover:bg-slate-50 transition-colors overflow-hidden"
                       >
-                        <FrameGraphic
-                          shape={prod.shape}
-                          type={prod.customSvgType}
-                          colorHex={prod.colors[0].hex}
-                          className="w-full h-full"
-                        />
+                        {prod.image || prod.colors[0]?.image ? (
+                          <img
+                            src={prod.image || prod.colors[0]?.image}
+                            alt={prod.name}
+                            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <FrameGraphic
+                            shape={prod.shape}
+                            type={prod.customSvgType}
+                            colorHex={prod.colors[0].hex}
+                            className="w-full h-full"
+                          />
+                        )}
                       </div>
 
                       {/* Meta & Buttons */}

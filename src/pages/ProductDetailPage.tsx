@@ -104,13 +104,21 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
             </div>
 
             {/* Central Graphic / Perspective */}
-            <div className="w-full max-w-md my-auto aspect-[16/9] flex items-center justify-center p-2">
-              <FrameGraphic
-                shape={product.shape}
-                type={product.customSvgType}
-                colorHex={activeColorObj.hex}
-                className="w-full h-full filter drop-shadow-md"
-              />
+            <div className="w-full max-w-md my-auto aspect-[16/9] flex items-center justify-center p-2 overflow-hidden">
+              {activeColorObj.image || product.image ? (
+                <img
+                  src={activeColorObj.image || product.image}
+                  alt={product.name}
+                  className="w-full h-full object-contain filter drop-shadow-md transition-transform duration-300 hover:scale-105"
+                />
+              ) : (
+                <FrameGraphic
+                  shape={product.shape}
+                  type={product.customSvgType}
+                  colorHex={activeColorObj.hex}
+                  className="w-full h-full filter drop-shadow-md"
+                />
+              )}
             </div>
 
             {/* 3D Virtual Try-On trigger inside photo viewport */}

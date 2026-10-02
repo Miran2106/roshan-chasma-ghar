@@ -60,8 +60,16 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                   key={prod.id}
                   className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between gap-3"
                 >
-                  <div className="w-20 h-14 bg-slate-50 rounded-lg flex items-center justify-center p-1 shrink-0">
-                    <FrameGraphic shape={prod.shape} type={prod.customSvgType} colorHex={prod.colors[0].hex} />
+                  <div className="w-20 h-14 bg-slate-50 rounded-lg flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                    {prod.image || prod.colors[0]?.image ? (
+                      <img
+                        src={prod.image || prod.colors[0]?.image}
+                        alt={prod.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <FrameGraphic shape={prod.shape} type={prod.customSvgType} colorHex={prod.colors[0].hex} />
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0">

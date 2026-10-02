@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BRAND_LOGO_IMAGE } from '../data/products';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -62,7 +63,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       >
         {!imageError ? (
           <img
-            src="/logo.png"
+            src={BRAND_LOGO_IMAGE}
             alt="Roshan Chasma Ghar Logo"
             className="w-full h-full object-contain rounded-lg"
             onError={() => setImageError(true)}

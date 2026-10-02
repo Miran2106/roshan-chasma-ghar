@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, CheckCircle, Calendar, Clock, MapPin, Sparkles, User, Phone, ShieldCheck, Database } from 'lucide-react';
 import { bookEyeTest } from '../services/supabaseService';
 import { useAuth } from '../context/AuthContext';
+import { BRAND_LOGO_IMAGE } from '../data/products';
 
 interface BookEyeTestModalProps {
   isOpen: boolean;
@@ -82,7 +83,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-black border border-amber-400/40 p-0.5 shadow-sm shrink-0 overflow-hidden">
               <img
-                src="/logo.png"
+                src={BRAND_LOGO_IMAGE}
                 alt="Roshan Chasma Ghar"
                 className="w-full h-full object-contain rounded-lg"
               />

@@ -19,7 +19,9 @@ import { FrameGraphic } from '../components/FrameGraphic';
 import {
   HERO_IMAGE,
   PRISM_IMAGE,
+  TITANIUM_HERO_IMAGE,
   CLINIC_IMAGE,
+  BRAND_LOGO_IMAGE,
   TESTIMONIALS,
 } from '../data/products';
 
@@ -69,7 +71,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       title: 'AURELIA SOVEREIGN COLLECTION',
       subtitle:
         'Aeronautical grade titanium balanced to an imperceptible 14.2 grams with 24-karat ion-plated temple accents.',
-      image: '/src/assets/images/titanium_eyewear_hero_1790413435545.jpg',
+      image: TITANIUM_HERO_IMAGE,
       badge: '100% Skin-Safe & Hypoallergenic',
     },
   ];
@@ -93,7 +95,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-black border border-amber-400/40 p-0.5 shadow-sm shrink-0 overflow-hidden">
                 <img
-                  src="/logo.png"
+                  src={BRAND_LOGO_IMAGE}
                   alt="Roshan Chasma Ghar"
                   className="w-full h-full object-contain rounded-lg"
                 />
@@ -183,7 +185,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-black border border-amber-400/40 p-0.5 shadow-sm shrink-0 overflow-hidden">
                 <img
-                  src="/logo.png"
+                  src={BRAND_LOGO_IMAGE}
                   alt="Roshan Chasma Ghar"
                   className="w-full h-full object-contain rounded-lg"
                 />

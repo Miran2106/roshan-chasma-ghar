@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { CartItem, AccessoryItem, PrescriptionData } from '../types/optical';
 import { FrameGraphic } from '../components/FrameGraphic';
-import { ACCESSORIES } from '../data/products';
+import { ACCESSORIES, BRAND_LOGO_IMAGE } from '../data/products';
 import { createOrder } from '../services/supabaseService';
 import { useAuth } from '../context/AuthContext';
 
@@ -120,7 +120,7 @@ export const CartPage: React.FC<CartPageProps> = ({
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-black border border-amber-400/40 p-0.5 shadow-sm shrink-0 overflow-hidden">
             <img
-              src="/logo.png"
+              src={BRAND_LOGO_IMAGE}
               alt="Roshan Chasma Ghar"
               className="w-full h-full object-contain rounded-md"
             />

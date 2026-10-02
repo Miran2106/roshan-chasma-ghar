@@ -1,11 +1,17 @@
 import { EyewearProduct, AccessoryItem, LensOption } from '../types/optical';
+import heroImage from '../assets/images/hero_eyewear_showcase_1790413410494.jpg';
+import prismImage from '../assets/images/optics_prism_spectrum_1790413423799.jpg';
+import titaniumHeroImage from '../assets/images/titanium_eyewear_hero_1790413435545.jpg';
+import clinicImage from '../assets/images/optometry_clinic_exam_1790413447317.jpg';
+import artisanImage from '../assets/images/artisan_optical_craftsman_1790413459465.jpg';
+import brandLogoImage from '../assets/images/roshan_chasma_ghar_logo_1790415782656.jpg';
 
-export const HERO_IMAGE = '/src/assets/images/hero_eyewear_showcase_1790413410494.jpg';
-export const PRISM_IMAGE = '/src/assets/images/optics_prism_spectrum_1790413423799.jpg';
-export const TITANIUM_HERO_IMAGE = '/src/assets/images/titanium_eyewear_hero_1790413435545.jpg';
-export const CLINIC_IMAGE = '/src/assets/images/optometry_clinic_exam_1790413447317.jpg';
-export const ARTISAN_IMAGE = '/src/assets/images/artisan_optical_craftsman_1790413459465.jpg';
-export const BRAND_LOGO_IMAGE = '/logo.png';
+export const HERO_IMAGE = heroImage;
+export const PRISM_IMAGE = prismImage;
+export const TITANIUM_HERO_IMAGE = titaniumHeroImage;
+export const CLINIC_IMAGE = clinicImage;
+export const ARTISAN_IMAGE = artisanImage;
+export const BRAND_LOGO_IMAGE = brandLogoImage;
 
 export const LENS_OPTIONS: LensOption[] = [
   {

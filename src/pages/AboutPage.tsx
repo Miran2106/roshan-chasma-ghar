@@ -16,8 +16,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookEyeT
         <div className="max-w-3xl space-y-5">
           <div className="flex flex-wrap items-center gap-4">
             <BrandLogo size="md" variant="light" />
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-xs font-bold text-[#e01a76] uppercase tracking-wider border border-slate-200">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-xs font-bold text-yellow-700 uppercase tracking-wider border border-yellow-200">
+              <Sparkles className="w-3.5 h-3.5 text-yellow-600" />
               <span>ESTABLISHED 1982 · MUMBAI, INDIA</span>
             </div>
           </div>
@@ -51,12 +51,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookEyeT
 
           <div className="grid grid-cols-2 gap-3 pt-3">
             <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-1">
-              <Award className="w-5 h-5 text-[#e01a76]" />
+              <Award className="w-5 h-5 text-yellow-600" />
               <h4 className="text-xs font-bold text-slate-900">42+ Years</h4>
               <p className="text-[11px] text-slate-500">Unbroken family optical legacy</p>
             </div>
             <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-1">
-              <Shield className="w-5 h-5 text-[#e01a76]" />
+              <Shield className="w-5 h-5 text-yellow-600" />
               <h4 className="text-xs font-bold text-slate-900">65,000+ Eyes</h4>
               <p className="text-[11px] text-slate-500">Corrected without distortion</p>
             </div>
@@ -90,7 +90,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookEyeT
           </div>
 
           <div className="lg:col-span-6 order-1 lg:order-2 space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#e01a76] font-display">
+            <span className="text-xs font-bold uppercase tracking-wider text-yellow-600 font-display">
               AUTHORIZED LENS PARTNERS
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900">
@@ -102,7 +102,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenBookEyeT
             <div className="pt-2">
               <button
                 onClick={onOpenBookEyeTest}
-                className="py-3 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md"
+                className="py-3 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md"
               >
                 BOOK YOUR CONSULTATION
               </button>

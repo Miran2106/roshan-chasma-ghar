@@ -113,7 +113,7 @@ export const AuthModal: React.FC = () => {
               }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
                 authModalMode === 'signin'
-                  ? 'bg-[#e01a76] text-white shadow font-bold'
+                  ? 'bg-yellow-500 text-slate-950 shadow font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -127,7 +127,7 @@ export const AuthModal: React.FC = () => {
               }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
                 authModalMode === 'signup'
-                  ? 'bg-[#e01a76] text-white shadow font-bold'
+                  ? 'bg-yellow-500 text-slate-950 shadow font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -166,7 +166,7 @@ export const AuthModal: React.FC = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Miran Mithawala"
-                    className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#e01a76] transition-colors"
+                    className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-400 transition-colors"
                   />
                 </div>
               </div>
@@ -182,7 +182,7 @@ export const AuthModal: React.FC = () => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 98200 98765"
-                    className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#e01a76] transition-colors"
+                    className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-400 transition-colors"
                   />
                 </div>
               </div>
@@ -201,7 +201,7 @@ export const AuthModal: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="miran.mithawala99@gmail.com"
-                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#e01a76] transition-colors"
+                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-400 transition-colors"
               />
             </div>
           </div>
@@ -219,7 +219,7 @@ export const AuthModal: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-10 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#e01a76] transition-colors"
+                className="w-full bg-[#1b1b22] border border-white/10 rounded-xl pl-10 pr-10 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-400 transition-colors"
               />
               <button
                 type="button"
@@ -235,7 +235,7 @@ export const AuthModal: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-[#e01a76] hover:bg-[#b7005d] text-white font-display text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 mt-3 active:scale-98 disabled:opacity-50"
+            className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-display text-xs font-black uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 mt-3 active:scale-98 disabled:opacity-50"
           >
             {loading ? (
               <span>Logging in...</span>

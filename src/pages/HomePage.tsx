@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowRight,
   Shield,
@@ -13,9 +13,12 @@ import {
   ChevronRight,
   Star,
   Heart,
+  Tag,
 } from 'lucide-react';
 import { EyewearProduct } from '../types/optical';
 import { FrameGraphic } from '../components/FrameGraphic';
+import { StoreAdvertisement } from '../types/advertisement';
+import { getStoreSettings, StoreSettings } from '../types/storeSettings';
 import {
   HERO_IMAGE,
   PRISM_IMAGE,
@@ -34,6 +37,7 @@ interface HomePageProps {
   onToggleWishlist: (product: EyewearProduct) => void;
   wishlistIds: string[];
   onAddToCart: (product: EyewearProduct) => void;
+  advertisement?: StoreAdvertisement;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -45,7 +49,9 @@ export const HomePage: React.FC<HomePageProps> = ({
   onToggleWishlist,
   wishlistIds,
   onAddToCart,
+  advertisement,
 }) => {
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(getStoreSettings());
   const [activeEdition, setActiveEdition] = useState(0);
   const [callRequestSent, setCallRequestSent] = useState(false);
   const [callForm, setCallForm] = useState({
@@ -54,6 +60,12 @@ export const HomePage: React.FC<HomePageProps> = ({
     service: 'Comprehensive Eye Test',
     time: 'Tomorrow 4 PM',
   });
+
+  useEffect(() => {
+    const handleUpdate = () => setStoreSettings(getStoreSettings());
+    window.addEventListener('store_settings_updated', handleUpdate);
+    return () => window.removeEventListener('store_settings_updated', handleUpdate);
+  }, []);
 
   const featuredFrames = products.slice(0, 8);
 
@@ -100,8 +112,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                   className="w-full h-full object-contain rounded-lg"
                 />
               </div>
-              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#e01a76]">
-                <span className="w-2 h-2 rounded-full bg-[#e01a76] animate-pulse" />
+              <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-yellow-600">
+                <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
                 <span>{currentEdition.kicker}</span>
               </div>
             </div>
@@ -109,7 +121,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-slate-900 leading-[1.12] text-balance">
               WELCOME TO <br />
               <span className="text-slate-900">ROSHAN </span>
-              <span className="text-[#e01a76]">CHASMA GHAR</span>
+              <span className="text-yellow-600">CHASMA GHAR</span>
             </h1>
 
             <p className="text-xs sm:text-base text-slate-600 leading-relaxed max-w-xl">
@@ -128,7 +140,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <button
                 onClick={onOpenBookEyeTest}
-                className="py-3 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm hover:shadow text-center"
+                className="py-3 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-sm hover:shadow text-center"
               >
                 BOOK EYE TEST
               </button>
@@ -145,7 +157,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </button>
               <button
                 onClick={() => setActiveEdition(activeEdition === 0 ? 1 : 0)}
-                className="w-8 h-8 rounded-md bg-[#e01a76] hover:bg-[#b7005d] flex items-center justify-center text-white transition-colors"
+                className="w-8 h-8 rounded-md bg-yellow-500 hover:bg-yellow-400 flex items-center justify-center text-slate-950 transition-colors"
                 aria-label="Next edition"
               >
                 <ChevronRight className="w-4 h-4" />
@@ -201,7 +213,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">
-              <span className="text-[#e01a76] text-5xl inline-block -mr-1">A</span>bout our shop
+              <span className="text-yellow-600 text-5xl inline-block -mr-1">A</span>bout our shop
             </h2>
 
             <div className="space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -219,14 +231,14 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="flex items-center gap-4 pt-2">
               <button
                 onClick={() => onNavigate('about')}
-                className="py-2.5 px-5 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-2"
+                className="py-2.5 px-5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors flex items-center gap-2"
               >
                 <span>READ MORE</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
               <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-slate-200">
-                <Sparkles className="w-4 h-4 text-[#e01a76]" />
+                <Sparkles className="w-4 h-4 text-yellow-600" />
                 <span className="text-xs font-bold text-slate-800">42+ YEARS LEGACY</span>
               </div>
             </div>
@@ -244,6 +256,38 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         </div>
       </section>
+
+      {/* ================= ATELIER SPOTLIGHT / ADVERTISEMENT BANNER ================= */}
+      {advertisement?.enabled && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#121217] via-[#241d0f] to-[#3a2805] text-white p-6 sm:p-10 border border-yellow-500/30 shadow-xl">
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="space-y-3 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{advertisement.bannerTag || 'ATELIER ANNOUNCEMENT'}</span>
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-white">
+                  {advertisement.heroHeadline || advertisement.announcementText || 'Exclusive Optical Heritage'}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  {advertisement.heroSubtitle}
+                </p>
+              </div>
+
+              <div className="shrink-0 flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => onNavigate(advertisement.heroCtaLink || 'catalog')}
+                  className="py-3 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 group whitespace-nowrap"
+                >
+                  <span>{advertisement.heroCtaText || 'Explore Eyewear'}</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ================= 3. OUR GLASSES (FEATURED PRODUCT GRID) ================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -272,10 +316,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <div className="p-2.5 sm:p-4 flex items-center justify-between z-10">
                   <span
                     className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md truncate max-w-[85px] sm:max-w-none ${
-                      prod.badgeType === 'gold'
+                      prod.badgeType === 'gold' || prod.badgeType === 'pink'
                         ? 'bg-amber-100 text-amber-900 border border-amber-200'
-                        : prod.badgeType === 'pink'
-                        ? 'bg-pink-100 text-[#e01a76]'
                         : 'bg-slate-100 text-slate-700'
                     }`}
                   >
@@ -284,10 +326,10 @@ export const HomePage: React.FC<HomePageProps> = ({
 
                   <button
                     onClick={() => onToggleWishlist(prod)}
-                    className="p-1 sm:p-1.5 rounded-full text-slate-400 hover:text-[#e01a76] hover:bg-pink-50 transition-colors"
+                    className="p-1 sm:p-1.5 rounded-full text-slate-400 hover:text-yellow-600 hover:bg-yellow-50 transition-colors"
                     aria-label="Save to wishlist"
                   >
-                    <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-[#e01a76] text-[#e01a76]' : ''}`} />
+                    <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-yellow-500 text-yellow-500' : ''}`} />
                   </button>
                 </div>
 
@@ -317,7 +359,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <div className="p-2.5 sm:p-4 pt-0 text-center space-y-1.5 sm:space-y-2">
                   <h3
                     onClick={() => onNavigate('product', prod.id)}
-                    className="text-xs sm:text-sm font-bold text-slate-900 cursor-pointer hover:text-[#e01a76] transition-colors truncate"
+                    className="text-xs sm:text-sm font-bold text-slate-900 cursor-pointer hover:text-yellow-600 transition-colors truncate"
                   >
                     {prod.name}
                   </h3>
@@ -338,12 +380,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                       onClick={() => onOpenVirtualTryOn(prod)}
                       className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] sm:text-[11px] font-semibold rounded-lg transition-colors flex items-center justify-center gap-1"
                     >
-                      <Eye className="w-3 h-3 text-[#e01a76]" />
+                      <Eye className="w-3 h-3 text-yellow-600" />
                       <span>Try On</span>
                     </button>
                     <button
                       onClick={() => onAddToCart(prod)}
-                      className="flex-1 py-1.5 px-2 sm:px-3 bg-[#e01a76] hover:bg-[#b7005d] text-white text-[10px] sm:text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs whitespace-nowrap"
+                      className="flex-1 py-1.5 px-2 sm:px-3 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs whitespace-nowrap"
                     >
                       BUY NOW
                     </button>
@@ -358,7 +400,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="text-center mt-10">
           <button
             onClick={() => onNavigate('catalog')}
-            className="inline-flex items-center gap-2 py-3 px-8 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all"
+            className="inline-flex items-center gap-2 py-3 px-8 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all"
           >
             <span>SEE MORE</span>
             <ArrowRight className="w-4 h-4" />
@@ -383,8 +425,8 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-[#e01a76]/40 transition-colors">
-            <div className="w-10 h-10 rounded-xl bg-pink-100 text-[#e01a76] flex items-center justify-center">
+          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-yellow-500/40 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center">
               <Sparkles className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold font-display text-slate-900">German Wavefront Lab</h3>
@@ -393,7 +435,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-[#e01a76]/40 transition-colors">
+          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-yellow-500/40 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
               <Eye className="w-5 h-5" />
             </div>
@@ -403,7 +445,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-[#e01a76]/40 transition-colors">
+          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-yellow-500/40 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
               <Shield className="w-5 h-5" />
             </div>
@@ -413,8 +455,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-[#e01a76]/40 transition-colors">
-            <div className="w-10 h-10 rounded-xl bg-pink-100 text-[#e01a76] flex items-center justify-center">
+          <div className="p-6 bg-white rounded-2xl border border-slate-200 space-y-3 hover:border-yellow-500/40 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center">
               <CheckCircle className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-bold font-display text-slate-900">Free Lifetime Care</h3>
@@ -441,7 +483,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
             {/* Zero Error Guarantee Floating Card */}
             <div className="absolute -bottom-4 left-6 right-6 sm:right-auto sm:max-w-xs bg-white p-3.5 rounded-xl shadow-lg border border-slate-200 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-pink-100 text-[#e01a76] flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center shrink-0">
                 <CheckCircle className="w-5 h-5" />
               </div>
               <div>
@@ -467,7 +509,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
             <div className="space-y-3 pt-2">
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <CheckCircle className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs font-bold text-slate-900">Screen Fatigue &amp; Digital Astigmatism</h4>
                   <p className="text-xs text-slate-500">Customized focal depths for developers, designers, and dual-monitor multi-taskers.</p>
@@ -475,7 +517,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <CheckCircle className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs font-bold text-slate-900">Seamless Progressive Adaptation</h4>
                   <p className="text-xs text-slate-500">Ultra-wide reading corridors without swim effect or unnatural head tilting.</p>
@@ -483,7 +525,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <CheckCircle className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="text-xs font-bold text-slate-900">Kids Pediatric Optical Fitting</h4>
                   <p className="text-xs text-slate-500">Specialized impact-resistant TR90 frames engineered for growing bridges.</p>
@@ -494,7 +536,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="pt-2">
               <button
                 onClick={() => onNavigate('clinic')}
-                className="inline-flex items-center gap-2 text-xs font-bold text-[#e01a76] hover:text-[#b7005d] uppercase tracking-wider"
+                className="inline-flex items-center gap-2 text-xs font-bold text-yellow-600 hover:text-yellow-700 uppercase tracking-wider"
               >
                 <span>EXPLORE CLINICAL EQUIPMENT</span>
                 <ArrowRight className="w-4 h-4" />
@@ -508,7 +550,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-2 mb-10">
           <h2 className="text-3xl font-extrabold font-display tracking-tight text-slate-900">
-            <span className="text-[#e01a76]">O</span>ur Customers
+            <span className="text-yellow-600">O</span>ur Customers
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
             Over 65,000 delighted eyes across four decades of precision vision care.
@@ -533,7 +575,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
-                <div className="w-9 h-9 rounded-full bg-pink-100 text-[#e01a76] font-bold text-xs flex items-center justify-center font-display">
+                <div className="w-9 h-9 rounded-full bg-yellow-100 text-yellow-700 font-bold text-xs flex items-center justify-center font-display">
                   {t.name[0]}
                 </div>
                 <div>
@@ -552,8 +594,8 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left: Call Back Form */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#e01a76] uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-[#e01a76]" />
+              <div className="flex items-center gap-2 text-xs font-bold text-yellow-500 uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-yellow-500" />
                 <span>IMMEDIATE OPTOMETRIC SUPPORT</span>
               </div>
 
@@ -578,7 +620,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     placeholder="Full Name"
                     value={callForm.name}
                     onChange={(e) => setCallForm({ ...callForm, name: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#e01a76]"
+                    className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-yellow-500"
                   />
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -588,13 +630,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                       placeholder="Phone Number"
                       value={callForm.phone}
                       onChange={(e) => setCallForm({ ...callForm, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#e01a76]"
+                      className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-yellow-500"
                     />
 
                     <select
                       value={callForm.service}
                       onChange={(e) => setCallForm({ ...callForm, service: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-[#e01a76]"
+                      className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                     >
                       <option value="Comprehensive Eye Test">Comprehensive Eye Test</option>
                       <option value="Prescription Lens Replacement">Prescription Lens Replacement</option>
@@ -607,12 +649,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                     placeholder="Preferred Time (e.g. Tomorrow 4 PM)"
                     value={callForm.time}
                     onChange={(e) => setCallForm({ ...callForm, time: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#e01a76]"
+                    className="w-full px-4 py-2.5 bg-[#25252b] border border-slate-700 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-yellow-500"
                   />
 
                   <button
                     type="submit"
-                    className="py-3 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2"
+                    className="py-3 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2"
                   >
                     <span>SEND REQUEST</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -630,23 +672,23 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <div className="space-y-3 text-xs text-slate-300 pt-1">
                 <div className="flex items-start gap-2.5">
-                  <MapPin className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                  <MapPin className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white block">Roshan Chasma Ghar Flagship Atelier</strong>
-                    <span>Main Market Optical Avenue, Opp. Clock Tower Square, Central Promenade, Landmark Optical Precinct 400001</span>
+                    <strong className="text-white block">{storeSettings.storeName} Flagship Atelier</strong>
+                    <span>{storeSettings.address}</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <Phone className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                  <Phone className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-white block">+91 (0) 22 2490 8282</strong>
-                    <span className="text-slate-400">Daily 10:00 AM – 9:00 PM (Sundays Open)</span>
+                    <strong className="text-white block">{storeSettings.phone}</strong>
+                    <span className="text-slate-400">{storeSettings.workingHours} ({storeSettings.sundayHours})</span>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <MessageSquare className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                  <MessageSquare className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-white block">Instant WhatsApp Concierge</strong>
                     <span className="text-slate-400">Send photo of prescription for immediate price quote</span>
@@ -656,7 +698,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <div className="pt-2">
                 <a
-                  href="https://wa.me/912224908282"
+                  href={`https://wa.me/${storeSettings.whatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 border border-white/10"

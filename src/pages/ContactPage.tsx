@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, MessageSquare, Clock, Mail, Send, CheckCircle } from 'lucide-react';
+import { getStoreSettings, StoreSettings } from '../types/storeSettings';
 
 export const ContactPage: React.FC = () => {
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(getStoreSettings());
   const [formSent, setFormSent] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -9,6 +11,12 @@ export const ContactPage: React.FC = () => {
     phone: '',
     message: '',
   });
+
+  useEffect(() => {
+    const handleUpdate = () => setStoreSettings(getStoreSettings());
+    window.addEventListener('store_settings_updated', handleUpdate);
+    return () => window.removeEventListener('store_settings_updated', handleUpdate);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +29,7 @@ export const ContactPage: React.FC = () => {
     <div className="space-y-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="text-center space-y-2 max-w-2xl mx-auto">
-        <span className="text-xs font-bold uppercase tracking-wider text-[#e01a76] font-display">
+        <span className="text-xs font-bold uppercase tracking-wider text-yellow-600 font-display">
           OPTICAL CONCIERGE &amp; LOCATIONS
         </span>
         <h1 className="text-3xl sm:text-5xl font-extrabold font-display text-slate-900 tracking-tight">
@@ -42,37 +50,40 @@ export const ContactPage: React.FC = () => {
 
             <div className="space-y-4 text-xs text-slate-600">
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-slate-900 block text-xs">Roshan Chasma Ghar Flagship Atelier</strong>
+                  <strong className="text-slate-900 block text-xs">{storeSettings.storeName} Flagship Atelier</strong>
                   <span className="leading-relaxed block mt-0.5">
-                    Main Market Optical Avenue, Opp. Clock Tower Square, Central Promenade, Landmark Optical Precinct 400001
+                    {storeSettings.address}
+                  </span>
+                  <span className="text-[11px] text-slate-400 block mt-0.5">
+                    Landmark: {storeSettings.landmark}
                   </span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <Phone className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-slate-900 block text-xs">Telephone</strong>
-                  <span>+91 (0) 22 2490 8282 / +91 98765 43210</span>
+                  <span>{storeSettings.phone}</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-slate-900 block text-xs">Atelier Hours</strong>
-                  <span>Mon – Sat: 10:00 AM – 9:00 PM</span>
-                  <span className="text-slate-400 block text-[11px]">Sundays open 11:00 AM – 6:00 PM for urgent eye tests</span>
+                  <span>{storeSettings.workingHours}</span>
+                  <span className="text-slate-400 block text-[11px]">{storeSettings.sundayHours}</span>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <Mail className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-slate-900 block text-xs">Email Concierge</strong>
-                  <span>concierge@roshanchasmeghar.com</span>
+                  <span>{storeSettings.email}</span>
                 </div>
               </div>
             </div>
@@ -116,7 +127,7 @@ export const ContactPage: React.FC = () => {
                     placeholder="e.g. Roshan Patel"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                   />
                 </div>
                 <div>
@@ -127,7 +138,7 @@ export const ContactPage: React.FC = () => {
                     placeholder="+91 98765 43210"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                   />
                 </div>
               </div>
@@ -140,7 +151,7 @@ export const ContactPage: React.FC = () => {
                   placeholder="name@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                 />
               </div>
 
@@ -152,13 +163,13 @@ export const ContactPage: React.FC = () => {
                   placeholder="Describe your frame questions or prescription requirements..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                 />
               </div>
 
               <button
                 type="submit"
-                className="py-3 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2"
+                className="py-3 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center gap-2"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>SEND MESSAGE</span>

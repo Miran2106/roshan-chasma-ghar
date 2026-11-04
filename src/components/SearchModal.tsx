@@ -88,7 +88,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                     <FrameGraphic shape={prod.shape} type={prod.customSvgType} colorHex={prod.colors[0].hex} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#e01a76] transition-colors">
+                    <h4 className="text-xs font-bold text-slate-900 group-hover:text-yellow-600 transition-colors">
                       {prod.name}
                     </h4>
                     <p className="text-[11px] text-slate-500">
@@ -103,7 +103,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                       onClose();
                       onOpenVirtualTryOn(prod);
                     }}
-                    className="p-2 text-slate-400 hover:text-[#e01a76] hover:bg-pink-50 rounded-lg transition-colors"
+                    className="p-2 text-slate-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
                     title="3D Virtual Try-On"
                   >
                     <Eye className="w-4 h-4" />

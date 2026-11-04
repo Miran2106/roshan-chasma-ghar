@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search, Heart, ShoppingBag, User, Menu, X, Glasses, Sparkles } from 'lucide-react';
+import { Search, Heart, ShoppingBag, User, Menu, X, Glasses, Sparkles, Tag } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { useAuth } from '../context/AuthContext';
+import { StoreAdvertisement } from '../types/advertisement';
 
 interface HeaderProps {
   currentPage: string;
@@ -11,6 +12,7 @@ interface HeaderProps {
   onOpenBookEyeTest: () => void;
   onOpenSearch: () => void;
   onOpenWishlist: () => void;
+  advertisement?: StoreAdvertisement;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -21,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenBookEyeTest,
   onOpenSearch,
   onOpenWishlist,
+  advertisement,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, profile, openAuthModal, openAccountDrawer } = useAuth();
@@ -38,12 +41,22 @@ export const Header: React.FC<HeaderProps> = ({
     { id: 'about', label: 'About Us' },
     { id: 'catalog', label: 'Eyewear Catalog' },
     { id: 'clinic', label: 'Eye Care & Clinic' },
-    { id: 'offers', label: 'Special Offers' },
     { id: 'contact', label: 'Contact Us' },
   ];
 
   return (
     <header className="sticky top-0 z-40 bg-[#121217] text-white border-b border-white/10 select-none shadow-md">
+      {/* Top Store Advertisement / Announcement Bar */}
+      {advertisement?.enabled && advertisement.announcementText && (
+        <div
+          onClick={() => onNavigate('catalog')}
+          className="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 text-slate-950 text-[11px] font-bold py-1.5 px-3 text-center flex items-center justify-center gap-2 cursor-pointer hover:opacity-95 transition-opacity border-b border-yellow-400/40 shadow-xs"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-slate-900 animate-pulse shrink-0" />
+          <span className="truncate max-w-3xl font-medium">{advertisement.announcementText}</span>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Zone 1: Brand Wordmark */}
@@ -95,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Heart className="w-4 h-4" />
               {wishlistCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#e01a76] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                <span className="absolute top-1 right-1 w-4 h-4 bg-yellow-500 text-slate-950 text-[10px] font-black rounded-full flex items-center justify-center leading-none shadow-xs">
                   {wishlistCount}
                 </span>
               )}
@@ -110,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <ShoppingBag className="w-4 h-4" />
               {cartCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#e01a76] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                <span className="absolute top-1 right-1 w-4 h-4 bg-yellow-500 text-slate-950 text-[10px] font-black rounded-full flex items-center justify-center leading-none shadow-xs">
                   {cartCount}
                 </span>
               )}
@@ -134,7 +147,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Primary Action Button: BOOK EYE TEST (Tablet & Desktop) */}
             <button
               onClick={onOpenBookEyeTest}
-              className="hidden sm:inline-flex py-2.5 px-3.5 sm:px-5 bg-[#e01a76] hover:bg-[#b7005d] text-white font-display text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all whitespace-nowrap active:scale-95"
+              className="hidden sm:inline-flex py-2.5 px-3.5 sm:px-5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-display text-xs font-black uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all whitespace-nowrap active:scale-95"
             >
               BOOK EYE TEST
             </button>
@@ -186,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onOpenBookEyeTest();
                 setMobileMenuOpen(false);
               }}
-              className="w-full py-3 bg-[#e01a76] text-white font-semibold text-xs uppercase tracking-wider rounded-lg"
+              className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold text-xs uppercase tracking-wider rounded-lg shadow-sm"
             >
               Schedule Eye Examination
             </button>

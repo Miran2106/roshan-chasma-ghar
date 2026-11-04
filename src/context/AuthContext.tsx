@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { UserProfile } from '../types/supabase';
 
-interface StoredAccount {
+export interface StoredAccount {
   id: string;
   email: string;
   password: string;
@@ -10,6 +10,10 @@ interface StoredAccount {
   phone: string;
   city: string;
   created_at: string;
+  isBlocked?: boolean;
+  blockedReason?: string;
+  totalOrders?: number;
+  lastLogin?: string;
 }
 
 interface AuthContextType {
@@ -30,6 +34,11 @@ interface AuthContextType {
   accountDrawerOpen: boolean;
   openAccountDrawer: () => void;
   closeAccountDrawer: () => void;
+  // Customer administration methods
+  getAllCustomers: () => StoredAccount[];
+  toggleBlockCustomer: (id: string, reason?: string) => { success: boolean; isBlocked: boolean };
+  deleteCustomer: (id: string) => void;
+  addCustomer: (cust: Omit<StoredAccount, 'id' | 'created_at'>) => StoredAccount;
 }
 
 const REGISTERED_ACCOUNTS_KEY = 'roshan_optical_accounts';
@@ -45,6 +54,8 @@ const INITIAL_ACCOUNTS: StoredAccount[] = [
     phone: '+91 98200 98765',
     city: 'Mumbai',
     created_at: new Date('2024-01-15').toISOString(),
+    isBlocked: false,
+    totalOrders: 3,
   },
   {
     id: 'usr-patron-01',
@@ -54,6 +65,30 @@ const INITIAL_ACCOUNTS: StoredAccount[] = [
     phone: '+91 98200 12345',
     city: 'Mumbai',
     created_at: new Date('2024-02-01').toISOString(),
+    isBlocked: false,
+    totalOrders: 1,
+  },
+  {
+    id: 'usr-aarav-02',
+    email: 'aarav.mehta@gmail.com',
+    password: 'password123',
+    fullName: 'Aarav Mehta',
+    phone: '+91 98190 44211',
+    city: 'Bandra West, Mumbai',
+    created_at: new Date('2024-02-18').toISOString(),
+    isBlocked: false,
+    totalOrders: 2,
+  },
+  {
+    id: 'usr-priya-03',
+    email: 'priya.deshmukh@yahoo.com',
+    password: 'password123',
+    fullName: 'Priya Deshmukh',
+    phone: '+91 98211 55678',
+    city: 'Worli, Mumbai',
+    created_at: new Date('2024-03-04').toISOString(),
+    isBlocked: false,
+    totalOrders: 1,
   },
 ];
 
@@ -98,12 +133,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (rawSession) {
         const parsed = JSON.parse(rawSession);
         if (parsed?.user && parsed?.profile) {
-          setUser(parsed.user);
-          setProfile(parsed.profile);
-          setSession({
-            user: parsed.user,
-            access_token: `token_${parsed.user.id}`,
-          } as any);
+          // Check if this account has been blocked
+          const accounts = getStoredAccounts();
+          const currentAccount = accounts.find((a) => a.id === parsed.user.id || a.email.toLowerCase() === parsed.user.email?.toLowerCase());
+
+          if (currentAccount?.isBlocked) {
+            // Immediately log out blocked users
+            localStorage.removeItem(ACTIVE_SESSION_KEY);
+            setUser(null);
+            setProfile(null);
+            setSession(null);
+          } else {
+            setUser(parsed.user);
+            setProfile(parsed.profile);
+            setSession({
+              user: parsed.user,
+              access_token: `token_${parsed.user.id}`,
+            } as any);
+          }
         }
       }
     } catch (err) {
@@ -156,7 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  // Instant Sign-In (No email confirmation required)
+  // Instant Sign-In (Checks if customer is blocked)
   const signIn = async (email: string, password: string): Promise<{ error: Error | null }> => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
@@ -172,6 +219,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const existing = accounts.find((a) => a.email.toLowerCase() === cleanEmail);
 
     if (existing) {
+      // Check if blocked by store admin
+      if (existing.isBlocked) {
+        return {
+          error: new Error(
+            existing.blockedReason
+              ? `Your account has been suspended: "${existing.blockedReason}". Please contact support@roshanchasmaghar.com.`
+              : 'Your account has been suspended by store administration. Please contact support@roshanchasmaghar.com.'
+          ),
+        };
+      }
+
       // Validate password
       if (existing.password && existing.password !== cleanPassword) {
         return {
@@ -193,6 +251,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       phone: '+91 98200 12345',
       city: 'Mumbai',
       created_at: new Date().toISOString(),
+      isBlocked: false,
     };
 
     const updatedAccounts = [...accounts, newAccount];
@@ -224,12 +283,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const existingIndex = accounts.findIndex((a) => a.email.toLowerCase() === cleanEmail);
 
     if (existingIndex >= 0) {
+      const existing = accounts[existingIndex];
+      if (existing.isBlocked) {
+        return {
+          error: new Error('This email has been suspended by store administration.'),
+        };
+      }
+
       // Account exists: update details, log in directly without email verification
       const updated = {
-        ...accounts[existingIndex],
+        ...existing,
         password: cleanPassword,
         fullName: cleanName,
-        phone: phone?.trim() || accounts[existingIndex].phone,
+        phone: phone?.trim() || existing.phone,
       };
       accounts[existingIndex] = updated;
       saveStoredAccounts(accounts);
@@ -247,6 +313,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       phone: phone?.trim() || '+91 98200 12345',
       city: 'Mumbai',
       created_at: new Date().toISOString(),
+      isBlocked: false,
     };
 
     saveStoredAccounts([...accounts, newAccount]);
@@ -259,6 +326,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithDemo = async () => {
     const accounts = getStoredAccounts();
     const miran = accounts.find((a) => a.email.includes('miran')) || accounts[0];
+    if (miran.isBlocked) {
+      alert('This test account is currently blocked in the Admin Side.');
+      return;
+    }
     establishSession(miran);
     closeAuthModal();
   };
@@ -301,6 +372,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error: null };
   };
 
+  // ================= ADMIN CUSTOMER MANAGEMENT =================
+  const getAllCustomers = (): StoredAccount[] => {
+    return getStoredAccounts();
+  };
+
+  const toggleBlockCustomer = (id: string, reason?: string): { success: boolean; isBlocked: boolean } => {
+    const accounts = getStoredAccounts();
+    let newBlockedState = false;
+    const updated = accounts.map((a) => {
+      if (a.id === id) {
+        newBlockedState = !a.isBlocked;
+        return {
+          ...a,
+          isBlocked: newBlockedState,
+          blockedReason: newBlockedState ? reason || 'Administrative suspension' : undefined,
+        };
+      }
+      return a;
+    });
+
+    saveStoredAccounts(updated);
+
+    // If currently logged-in user was blocked, force log out
+    if (user?.id === id && newBlockedState) {
+      signOut();
+    }
+
+    return { success: true, isBlocked: newBlockedState };
+  };
+
+  const deleteCustomer = (id: string) => {
+    const accounts = getStoredAccounts();
+    const filtered = accounts.filter((a) => a.id !== id);
+    saveStoredAccounts(filtered);
+
+    if (user?.id === id) {
+      signOut();
+    }
+  };
+
+  const addCustomer = (cust: Omit<StoredAccount, 'id' | 'created_at'>): StoredAccount => {
+    const accounts = getStoredAccounts();
+    const newCust: StoredAccount = {
+      ...cust,
+      id: `usr-admin-${Date.now()}`,
+      created_at: new Date().toISOString(),
+      isBlocked: false,
+    };
+    saveStoredAccounts([newCust, ...accounts]);
+    return newCust;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -321,6 +444,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         accountDrawerOpen,
         openAccountDrawer,
         closeAccountDrawer,
+        getAllCustomers,
+        toggleBlockCustomer,
+        deleteCustomer,
+        addCustomer,
       }}
     >
       {children}

@@ -143,7 +143,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
 
           {/* Live PD Target Markers */}
           <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs border border-white/10">
-            <Eye className="w-3.5 h-3.5 text-[#e01a76]" />
+            <Eye className="w-3.5 h-3.5 text-yellow-400" />
             <span>Virtual Fitting · PD: {pupilDistance}mm</span>
           </div>
 
@@ -157,7 +157,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
                     onClick={() => setSelectedModel(idx)}
                     className={`px-2.5 py-1 text-xs rounded-lg transition-all ${
                       selectedModel === idx
-                        ? 'bg-[#e01a76] text-white font-medium shadow-sm'
+                        ? 'bg-yellow-500 text-slate-950 font-bold shadow-sm'
                         : 'text-slate-300 hover:text-white bg-white/10'
                     }`}
                   >
@@ -179,8 +179,8 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
         {/* Right Side: Adjustment Controls & Purchase */}
         <div className="md:w-2/5 p-6 flex flex-col justify-between bg-white overflow-y-auto">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#e01a76] tracking-wider uppercase mb-1">
-              <Sparkles className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2 text-xs font-semibold text-yellow-700 tracking-wider uppercase mb-1">
+              <Sparkles className="w-3.5 h-3.5 text-yellow-500" />
               <span>3D Virtual Try-On</span>
             </div>
             <h2 className="text-xl font-bold font-display text-slate-900 leading-snug">
@@ -197,7 +197,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
               <span className="text-xs text-slate-400 line-through">
                 ₹{product.originalPrice.toLocaleString()}
               </span>
-              <span className="text-xs font-bold text-[#e01a76] bg-pink-50 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-bold text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded-md border border-yellow-200">
                 SAVE {product.discountPercent}%
               </span>
             </div>
@@ -220,7 +220,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
                     onClick={() => setSelectedColor(color.name)}
                     className={`w-7 h-7 rounded-full transition-all flex items-center justify-center ${
                       selectedColor === color.name
-                        ? 'ring-2 ring-offset-2 ring-[#e01a76] scale-110'
+                        ? 'ring-2 ring-offset-2 ring-yellow-500 scale-110'
                         : 'hover:scale-105 border border-slate-300'
                     }`}
                     style={{ backgroundColor: color.hex }}
@@ -265,7 +265,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
                   max="125"
                   value={frameScale}
                   onChange={(e) => setFrameScale(Number(e.target.value))}
-                  className="w-full accent-[#e01a76] h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  className="w-full accent-yellow-500 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                 />
               </div>
 
@@ -281,7 +281,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
                   max="30"
                   value={verticalOffset}
                   onChange={(e) => setVerticalOffset(Number(e.target.value))}
-                  className="w-full accent-[#e01a76] h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  className="w-full accent-yellow-500 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                 />
               </div>
 
@@ -297,7 +297,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
                   max="70"
                   value={pupilDistance}
                   onChange={(e) => setPupilDistance(Number(e.target.value))}
-                  className="w-full accent-[#e01a76] h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  className="w-full accent-yellow-500 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                 />
               </div>
             </div>
@@ -310,7 +310,7 @@ export const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
                 onAddToCart(product, selectedColor);
                 onClose();
               }}
-              className="w-full py-3 px-4 bg-[#e01a76] hover:bg-[#b7005d] text-white font-semibold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               <span>Add This Look To Bag</span>
               <ChevronRight className="w-4 h-4" />

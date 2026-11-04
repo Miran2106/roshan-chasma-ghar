@@ -26,8 +26,23 @@ import {
   User,
   Phone,
   AlertTriangle,
-  ArrowUpDown
+  ArrowUpDown,
+  Users,
+  UserX,
+  UserCheck,
+  ShieldAlert,
+  Megaphone,
+  Bell,
+  Percent,
+  Copy,
+  MessageCircle,
+  X,
+  Mail,
+  MapPin,
 } from 'lucide-react';
+import { useAuth, StoredAccount } from '../context/AuthContext';
+import { StoreAdvertisement, DEFAULT_ADVERTISEMENT } from '../types/advertisement';
+import { getStoreSettings, saveStoreSettings, StoreSettings } from '../types/storeSettings';
 
 // Boutique asset photo references
 import productAviatorNavigator from '../assets/images/sunglasses_aviator_navigator_1790967671340.jpg';
@@ -46,6 +61,10 @@ interface AdminPageProps {
   onResetFactoryProducts: () => void;
   onNavigate: (page: string, productId?: string) => void;
   onQuickView: (product: EyewearProduct) => void;
+  advertisement?: StoreAdvertisement;
+  onUpdateAdvertisement?: (adv: StoreAdvertisement) => void;
+  onClearCart?: () => void;
+  onClearWishlist?: () => void;
 }
 
 interface OrderItem {
@@ -92,8 +111,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   onResetFactoryProducts,
   onNavigate,
   onQuickView,
+  advertisement,
+  onUpdateAdvertisement,
+  onClearCart,
+  onClearWishlist,
 }) => {
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'appointments' | 'prescriptions' | 'store'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'customers' | 'advertisement' | 'orders' | 'appointments' | 'prescriptions'>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortField, setSortField] = useState<'name' | 'price' | 'rating'>('name');
@@ -103,6 +126,133 @@ export const AdminPage: React.FC<AdminPageProps> = ({
   const [bulkImageUrl, setBulkImageUrl] = useState('');
   const [inlineUrls, setInlineUrls] = useState<{ [id: string]: string }>({});
   const [imageLoadError, setImageLoadError] = useState(false);
+
+  // Auth & Admin Access Gate State
+  const { user, profile, openAuthModal, getAllCustomers, toggleBlockCustomer, deleteCustomer, addCustomer } = useAuth();
+  const [passcodeAttempt, setPasscodeAttempt] = useState('');
+  const [passcodeError, setPasscodeError] = useState('');
+  const [isPasscodeUnlocked, setIsPasscodeUnlocked] = useState<boolean>(() => {
+    return localStorage.getItem('roshan_admin_passcode_auth') === 'true';
+  });
+
+  // Flagship Store Address & Contact State
+  const [storeSettingsForm, setStoreSettingsForm] = useState<StoreSettings>(() => getStoreSettings());
+
+  const handleSaveStoreSettings = () => {
+    saveStoreSettings(storeSettingsForm);
+    notify('Flagship store address and contact details saved & propagated to storefront!');
+  };
+
+  // Customer Management States
+  const [customers, setCustomers] = useState<StoredAccount[]>(() => getAllCustomers());
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [customerStatusFilter, setCustomerStatusFilter] = useState<'all' | 'active' | 'blocked'>('all');
+  const [selectedCustomer, setSelectedCustomer] = useState<StoredAccount | null>(null);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [newCustForm, setNewCustForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    city: 'Mumbai',
+    password: 'password123',
+  });
+  const [blockPromptCustomer, setBlockPromptCustomer] = useState<StoredAccount | null>(null);
+  const [blockReasonInput, setBlockReasonInput] = useState('');
+
+  const refreshCustomers = () => {
+    setCustomers(getAllCustomers());
+  };
+
+  const handleToggleBlock = (customer: StoredAccount, reason?: string) => {
+    const res = toggleBlockCustomer(customer.id, reason);
+    refreshCustomers();
+    if (res.isBlocked) {
+      notify(`Customer ${customer.fullName} (${customer.email}) has been BLOCKED`);
+    } else {
+      notify(`Customer ${customer.fullName} has been UNBLOCKED & restored`);
+    }
+    if (selectedCustomer?.id === customer.id) {
+      setSelectedCustomer((prev) => prev ? {
+        ...prev,
+        isBlocked: res.isBlocked,
+        blockedReason: res.isBlocked ? reason || 'Administrative suspension' : undefined,
+      } : null);
+    }
+    setBlockPromptCustomer(null);
+    setBlockReasonInput('');
+  };
+
+  const handleDeleteCustomer = (customer: StoredAccount) => {
+    if (confirm(`Permanently remove customer record for ${customer.fullName} (${customer.email})?`)) {
+      deleteCustomer(customer.id);
+      refreshCustomers();
+      notify(`Customer record for ${customer.fullName} deleted`);
+      if (selectedCustomer?.id === customer.id) {
+        setSelectedCustomer(null);
+      }
+    }
+  };
+
+  const handleCreateCustomer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCustForm.email.includes('@')) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    addCustomer(newCustForm);
+    refreshCustomers();
+    setIsAddCustomerOpen(false);
+    setNewCustForm({ fullName: '', email: '', phone: '', city: 'Mumbai', password: 'password123' });
+    notify(`New patron ${newCustForm.fullName} registered successfully`);
+  };
+
+  // Advertisement & Announcements States
+  const [advForm, setAdvForm] = useState<StoreAdvertisement>(() => advertisement || DEFAULT_ADVERTISEMENT);
+
+  useEffect(() => {
+    if (advertisement) {
+      setAdvForm(advertisement);
+    }
+  }, [advertisement]);
+
+  const handleSaveAdv = () => {
+    const updated = {
+      ...advForm,
+      updatedAt: new Date().toISOString(),
+    };
+    if (onUpdateAdvertisement) {
+      onUpdateAdvertisement(updated);
+    }
+    notify('Store advertisements, banners and copy updated live!');
+  };
+
+  // Product Marketing Description Quick-Editor state
+  const [advSelectedProduct, setAdvSelectedProduct] = useState<EyewearProduct>(products[0]);
+  const [tempDesc, setTempDesc] = useState(products[0]?.description || '');
+  const [tempSubtitle, setTempSubtitle] = useState(products[0]?.subtitle || '');
+  const [tempCraft, setTempCraft] = useState(products[0]?.craftDetails || '');
+  const [tempBadge, setTempBadge] = useState(products[0]?.badge || '');
+
+  const handleSelectProductForDesc = (prod: EyewearProduct) => {
+    setAdvSelectedProduct(prod);
+    setTempDesc(prod.description || '');
+    setTempSubtitle(prod.subtitle || '');
+    setTempCraft(prod.craftDetails || '');
+    setTempBadge(prod.badge || '');
+  };
+
+  const handleSaveProductDescription = () => {
+    if (!advSelectedProduct) return;
+    const updated: EyewearProduct = {
+      ...advSelectedProduct,
+      description: tempDesc.trim(),
+      subtitle: tempSubtitle.trim(),
+      craftDetails: tempCraft.trim(),
+      badge: tempBadge.trim() || undefined,
+    };
+    onUpdateProduct(updated);
+    notify(`Marketing description updated for ${updated.name}`);
+  };
 
   // Modal states for Product Editing
   const [photoModalProduct, setPhotoModalProduct] = useState<EyewearProduct | null>(null);
@@ -404,7 +554,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     shapeLabel: 'Modern Square',
     sizeCategory: 'Medium',
     badge: 'NEW ARRIVAL',
-    badgeType: 'pink',
+    badgeType: 'gold',
     frameTone: 'black',
     defaultColor: 'Obsidian Black',
     rating: 5.0,
@@ -444,7 +594,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
       rating: 5.0,
       reviewCount: 1,
       badge: newProduct.badge || 'NEW ARRIVAL',
-      badgeType: newProduct.badgeType || 'pink',
+      badgeType: newProduct.badgeType || 'gold',
       defaultColor: newProduct.defaultColor || 'Obsidian Black',
       frameTone: newProduct.frameTone || 'black',
       colors: newProduct.colors || [{ name: 'Obsidian Black', hex: '#111111' }],
@@ -459,13 +609,116 @@ export const AdminPage: React.FC<AdminPageProps> = ({
     setIsAddProductOpen(false);
   };
 
+  // Admin-only gate checking
+  const isMasterAdminEmail =
+    user?.email?.toLowerCase() === 'miran.mithawala99@gmail.com' ||
+    user?.email?.toLowerCase() === 'admin@roshanchasmeghar.com';
+  const isAuthorizedAdmin = isMasterAdminEmail || isPasscodeUnlocked;
+
+  if (!isAuthorizedAdmin) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4">
+        <div className="max-w-md w-full bg-slate-900 border border-yellow-500/30 rounded-3xl p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-yellow-500/20 to-amber-500/20 border border-yellow-500/40 flex items-center justify-center mx-auto text-yellow-400 shadow-lg shadow-yellow-900/20">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-yellow-400 bg-yellow-500/10 border border-yellow-500/30 px-3 py-1 rounded-full inline-block">
+              ADMINISTRATOR ONLY ACCESS
+            </span>
+            <h2 className="text-2xl font-extrabold font-display text-white">
+              Store Admin Terminal
+            </h2>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              This terminal is strictly restricted to store administrators (<strong className="text-yellow-400">miran.mithawala99@gmail.com</strong>). Regular customers cannot view or modify administrative records.
+            </p>
+          </div>
+
+          {user ? (
+            <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-left space-y-1">
+              <span className="text-[10px] text-slate-500 uppercase font-semibold block">Signed In Account</span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white truncate max-w-[200px]">{user.email}</span>
+                <span className="text-[10px] px-2 py-0.5 bg-red-950/80 text-red-300 border border-red-800/60 rounded font-semibold">Customer Account</span>
+              </div>
+              <p className="text-[11px] text-red-400 pt-1">
+                ⚠️ Store Admin privileges are only granted to miran.mithawala99@gmail.com.
+              </p>
+            </div>
+          ) : (
+            <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-400 text-left">
+              🔒 You are not signed in. Please log in with the designated store administrator credentials.
+            </div>
+          )}
+
+          {/* Action options */}
+          <div className="space-y-3 pt-2">
+            <button
+              onClick={() => openAuthModal('signin')}
+              className="w-full py-3 px-4 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              <User className="w-4 h-4" />
+              <span>{user ? 'Switch to Admin Account' : 'Sign In as Store Administrator'}</span>
+            </button>
+
+            <div className="pt-2 border-t border-slate-800 space-y-2">
+              <span className="text-[11px] text-slate-400 block font-medium">Or enter Master Admin PIN:</span>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (passcodeAttempt.trim() === '9920' || passcodeAttempt.trim().toLowerCase() === 'roshan2025' || passcodeAttempt.trim().toLowerCase() === 'admin') {
+                    setIsPasscodeUnlocked(true);
+                    localStorage.setItem('roshan_admin_passcode_auth', 'true');
+                    notify('Master Admin PIN verified. Terminal unlocked!');
+                  } else {
+                    setPasscodeError('Invalid Admin PIN. Authorized administrators only.');
+                  }
+                }}
+                className="flex gap-2"
+              >
+                <input
+                  type="password"
+                  placeholder="Master PIN (e.g. 9920)"
+                  value={passcodeAttempt}
+                  onChange={(e) => { setPasscodeAttempt(e.target.value); setPasscodeError(''); }}
+                  className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 font-mono"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-yellow-400 text-xs font-bold rounded-xl border border-slate-700"
+                >
+                  Unlock
+                </button>
+              </form>
+              {passcodeError && (
+                <p className="text-[11px] text-red-400 text-left font-medium">{passcodeError}</p>
+              )}
+            </div>
+
+            <div className="pt-2">
+              <button
+                onClick={() => onNavigate('home')}
+                className="text-xs text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 mx-auto"
+              >
+                <span>← Return to Customer Storefront</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans pb-16">
       {/* ================= ADMIN TOP BAR ================= */}
       <header className="bg-slate-950 border-b border-slate-800 sticky top-0 z-30 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#e01a76] to-pink-500 flex items-center justify-center shadow-md shadow-pink-900/30">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#eab308] to-amber-500 flex items-center justify-center shadow-md shadow-yellow-900/20">
               <Sliders className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -473,7 +726,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <h1 className="text-sm sm:text-base font-bold text-white tracking-wide font-display">
                   ROSHAN CHASMA GHAR
                 </h1>
-                <span className="text-[10px] bg-pink-500/20 text-pink-300 border border-pink-500/30 px-2 py-0.5 rounded-full font-semibold">
+                <span className="text-[10px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 px-2 py-0.5 rounded-full font-semibold">
                   ADMIN CONSOLE
                 </span>
               </div>
@@ -481,13 +734,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {(onClearCart || onClearWishlist) && (
+              <button
+                onClick={() => {
+                  if (confirm('Clear all items from your bag and like list?')) {
+                    if (onClearCart) onClearCart();
+                    if (onClearWishlist) onClearWishlist();
+                    notify('All items in bag & like list cleared successfully!');
+                  }
+                }}
+                className="px-3 py-1.5 bg-red-950/60 hover:bg-red-900/80 text-red-200 text-xs font-semibold rounded-lg border border-red-800/60 flex items-center gap-1.5 transition-colors shadow-2xs"
+                title="Clear all bag items and saved like list"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                <span className="hidden sm:inline">Clear Bag &amp; Like List</span>
+                <span className="sm:hidden">Clear Lists</span>
+              </button>
+            )}
+
             <button
               onClick={() => onNavigate('home')}
               className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1.5 transition-colors"
             >
               <span>View Storefront</span>
-              <ExternalLink className="w-3.5 h-3.5 text-pink-400" />
+              <ExternalLink className="w-3.5 h-3.5 text-yellow-400" />
             </button>
           </div>
         </div>
@@ -495,7 +766,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
       {/* Notification Toast */}
       {notification && (
-        <div className="fixed top-20 right-6 z-50 bg-[#e01a76] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 animate-bounce">
+        <div className="fixed top-20 right-6 z-50 bg-[#eab308] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 animate-bounce">
           <CheckCircle className="w-4 h-4" />
           <span>{notification}</span>
         </div>
@@ -508,7 +779,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Total Frames</span>
-              <Package className="w-4 h-4 text-pink-400" />
+              <Package className="w-4 h-4 text-yellow-400" />
             </div>
             <p className="text-2xl font-bold font-display text-white mt-1">{products.length}</p>
             <p className="text-[11px] text-slate-400 mt-0.5">Active in live catalog</p>
@@ -548,21 +819,45 @@ export const AdminPage: React.FC<AdminPageProps> = ({
         <div className="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto text-xs font-semibold">
           <button
             onClick={() => setActiveTab('products')}
-            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
               activeTab === 'products'
-                ? 'bg-[#e01a76] text-white shadow-md'
+                ? 'bg-[#eab308] text-white shadow-md'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
             <Package className="w-4 h-4" />
-            <span>Product &amp; Price Manager ({products.length})</span>
+            <span>Product &amp; Price ({products.length})</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('customers'); refreshCustomers(); }}
+            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
+              activeTab === 'customers'
+                ? 'bg-[#eab308] text-white shadow-md'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>Customers &amp; Block List ({customers.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('advertisement')}
+            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
+              activeTab === 'advertisement'
+                ? 'bg-[#eab308] text-white shadow-md'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            <Megaphone className="w-4 h-4" />
+            <span>Adv &amp; Descriptions</span>
           </button>
 
           <button
             onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
               activeTab === 'orders'
-                ? 'bg-[#e01a76] text-white shadow-md'
+                ? 'bg-[#eab308] text-white shadow-md'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
@@ -572,21 +867,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
           <button
             onClick={() => setActiveTab('appointments')}
-            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
               activeTab === 'appointments'
-                ? 'bg-[#e01a76] text-white shadow-md'
+                ? 'bg-[#eab308] text-white shadow-md'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
             <Calendar className="w-4 h-4" />
-            <span>Eye Test Bookings ({appointments.length})</span>
+            <span>Eye Tests ({appointments.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('prescriptions')}
-            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
+            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all whitespace-nowrap ${
               activeTab === 'prescriptions'
-                ? 'bg-[#e01a76] text-white shadow-md'
+                ? 'bg-[#eab308] text-white shadow-md'
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
@@ -608,14 +903,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     placeholder="Search by name, SKU, shape, material..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 text-xs rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-pink-500"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 text-xs rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500"
                   />
                 </div>
 
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-pink-500"
+                  className="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-yellow-500"
                 >
                   <option value="all">All Categories</option>
                   <option value="eyeglasses">Eyeglasses</option>
@@ -644,7 +939,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 <button
                   onClick={() => setIsAddProductOpen(true)}
-                  className="px-4 py-2 bg-[#e01a76] hover:bg-pink-600 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 transition-all"
+                  className="px-4 py-2 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 transition-all"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add New Frame</span>
@@ -653,15 +948,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({
             </div>
 
             {/* Bulk Change All Images Bar */}
-            <div className="bg-gradient-to-r from-pink-950/40 via-slate-800 to-slate-900 border border-pink-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-md">
+            <div className="bg-gradient-to-r from-amber-950/40 via-slate-800 to-slate-900 border border-yellow-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-md">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-yellow-500/20 border border-yellow-500/40 flex items-center justify-center text-yellow-400 shrink-0">
                   <ImageIcon className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-white flex items-center gap-1.5 font-display">
                     <span>Bulk Image Updater (External URL)</span>
-                    <span className="text-[9px] bg-pink-500/20 text-pink-300 px-1.5 py-0.2 rounded font-mono">ALL FRAMES</span>
+                    <span className="text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.2 rounded font-mono">ALL FRAMES</span>
                   </h4>
                   <p className="text-[11px] text-slate-400">Paste any image link (e.g. from Google Images, Imgur, CDN) to apply to all {products.length} frames at once.</p>
                 </div>
@@ -673,7 +968,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   placeholder="Paste external image URL (https://...)"
                   value={bulkImageUrl}
                   onChange={(e) => setBulkImageUrl(e.target.value)}
-                  className="flex-1 md:w-80 px-3 py-1.5 bg-slate-950 border border-slate-700 text-xs rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-pink-500 font-mono"
+                  className="flex-1 md:w-80 px-3 py-1.5 bg-slate-950 border border-slate-700 text-xs rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 font-mono"
                 />
                 <button
                   onClick={() => {
@@ -683,7 +978,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     }
                     handleApplyPhotoToAll(bulkImageUrl);
                   }}
-                  className="px-3.5 py-1.5 bg-[#e01a76] hover:bg-pink-600 text-white text-xs font-bold rounded-xl whitespace-nowrap shadow-sm transition-all flex items-center gap-1"
+                  className="px-3.5 py-1.5 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl whitespace-nowrap shadow-sm transition-all flex items-center gap-1"
                 >
                   <Upload className="w-3.5 h-3.5" />
                   <span>Apply to ALL Frames</span>
@@ -745,7 +1040,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                                 className="absolute inset-0 bg-slate-950/80 text-white opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-0.5 transition-opacity"
                                 title="Change Photo"
                               >
-                                <ImageIcon className="w-3.5 h-3.5 text-pink-400" />
+                                <ImageIcon className="w-3.5 h-3.5 text-yellow-400" />
                                 <span className="text-[8px] font-bold">CHANGE</span>
                               </button>
                             </div>
@@ -763,14 +1058,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                                     if (val) handleSaveInlinePhoto(prod, val);
                                   }
                                 }}
-                                className="w-24 text-[9px] px-1.5 py-0.5 bg-slate-950 border border-slate-700 rounded text-slate-200 focus:outline-none focus:border-pink-500 placeholder-slate-600"
+                                className="w-24 text-[9px] px-1.5 py-0.5 bg-slate-950 border border-slate-700 rounded text-slate-200 focus:outline-none focus:border-yellow-500 placeholder-slate-600"
                               />
                               <button
                                 onClick={() => {
                                   const val = inlineUrls[prod.id];
                                   if (val) handleSaveInlinePhoto(prod, val);
                                 }}
-                                className="p-1 bg-[#e01a76] hover:bg-pink-600 text-white rounded text-[9px] font-bold transition-colors"
+                                className="p-1 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white rounded text-[9px] font-bold transition-colors"
                                 title="Save External Image URL"
                               >
                                 <Check className="w-2.5 h-2.5" />
@@ -782,13 +1077,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         {/* Name & SKU Cell */}
                         <td className="py-3 px-4">
                           <div className="space-y-0.5 max-w-xs">
-                            <span className="text-xs font-bold text-white hover:text-pink-400 transition-colors cursor-pointer" onClick={() => onNavigate('product', prod.id)}>
+                            <span className="text-xs font-bold text-white hover:text-yellow-400 transition-colors cursor-pointer" onClick={() => onNavigate('product', prod.id)}>
                               {prod.name}
                             </span>
                             <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
                               <span>SKU: {prod.sku}</span>
                               {prod.badge && (
-                                <span className="bg-pink-500/20 text-pink-300 px-1.5 py-0.2 rounded font-sans text-[9px] font-semibold">
+                                <span className="bg-yellow-500/20 text-yellow-300 px-1.5 py-0.2 rounded font-sans text-[9px] font-semibold">
                                   {prod.badge}
                                 </span>
                               )}
@@ -808,13 +1103,13 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         <td className="py-3 px-4">
                           <button
                             onClick={() => handleOpenPriceModal(prod)}
-                            className="group flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-pink-500 transition-all"
+                            className="group flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-yellow-500 transition-all"
                             title="Click to edit price"
                           >
                             <span className="text-sm font-bold font-display text-emerald-400">
                               ₹{prod.price.toLocaleString()}
                             </span>
-                            <Edit2 className="w-3 h-3 text-slate-400 group-hover:text-pink-400 transition-colors" />
+                            <Edit2 className="w-3 h-3 text-slate-400 group-hover:text-yellow-400 transition-colors" />
                           </button>
                         </td>
 
@@ -845,7 +1140,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleOpenPhotoModal(prod)}
-                              className="p-1.5 bg-slate-900 hover:bg-slate-700 text-slate-300 hover:text-pink-400 rounded-lg border border-slate-700 transition-colors"
+                              className="p-1.5 bg-slate-900 hover:bg-slate-700 text-slate-300 hover:text-yellow-400 rounded-lg border border-slate-700 transition-colors"
                               title="Change Photo"
                             >
                               <ImageIcon className="w-3.5 h-3.5" />
@@ -890,7 +1185,581 @@ export const AdminPage: React.FC<AdminPageProps> = ({
           </div>
         )}
 
-        {/* ================= TAB 2: CUSTOMER ORDERS ================= */}
+        {/* ================= TAB 2: CUSTOMERS & BLOCK MANAGER ================= */}
+        {activeTab === 'customers' && (
+          <div className="space-y-4">
+            {/* Top Bar with Search & Filters */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-800/70 p-3.5 rounded-2xl border border-slate-700/80">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search patrons by name, email, phone, city..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 text-xs rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 text-xs overflow-x-auto">
+                  <button
+                    onClick={() => setCustomerStatusFilter('all')}
+                    className={`px-3 py-1 rounded-lg font-semibold transition-colors whitespace-nowrap ${
+                      customerStatusFilter === 'all' ? 'bg-[#eab308] text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    All Patrons ({customers.length})
+                  </button>
+                  <button
+                    onClick={() => setCustomerStatusFilter('active')}
+                    className={`px-3 py-1 rounded-lg font-semibold transition-colors whitespace-nowrap ${
+                      customerStatusFilter === 'active' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Active ({customers.filter((c) => !c.isBlocked).length})
+                  </button>
+                  <button
+                    onClick={() => setCustomerStatusFilter('blocked')}
+                    className={`px-3 py-1 rounded-lg font-semibold transition-colors whitespace-nowrap ${
+                      customerStatusFilter === 'blocked' ? 'bg-red-600 text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Blocked ({customers.filter((c) => c.isBlocked).length})
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsAddCustomerOpen(true)}
+                  className="px-4 py-2 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-1.5 transition-all whitespace-nowrap"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Register Patron</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Customers Table */}
+            <div className="bg-slate-800/90 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-900/80 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-700">
+                    <tr>
+                      <th className="py-3 px-4">Patron Name &amp; ID</th>
+                      <th className="py-3 px-4">Email Address</th>
+                      <th className="py-3 px-4">Contact Phone</th>
+                      <th className="py-3 px-4">City / Area</th>
+                      <th className="py-3 px-4">Joined Date</th>
+                      <th className="py-3 px-4">Account Status</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700/60">
+                    {customers
+                      .filter((c) => {
+                        const q = customerSearch.toLowerCase();
+                        const matchesSearch =
+                          c.fullName.toLowerCase().includes(q) ||
+                          c.email.toLowerCase().includes(q) ||
+                          (c.phone && c.phone.includes(q)) ||
+                          (c.city && c.city.toLowerCase().includes(q));
+
+                        if (customerStatusFilter === 'active') return matchesSearch && !c.isBlocked;
+                        if (customerStatusFilter === 'blocked') return matchesSearch && c.isBlocked;
+                        return matchesSearch;
+                      })
+                      .map((cust) => (
+                        <tr key={cust.id} className="hover:bg-slate-750/50 transition-colors">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-500 to-purple-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                {cust.fullName.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <span className="font-bold text-white block">{cust.fullName}</span>
+                                <span className="text-[10px] text-slate-400 font-mono">{cust.id}</span>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-1.5 text-slate-300">
+                              <span>{cust.email}</span>
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(cust.email);
+                                  notify(`Copied ${cust.email}`);
+                                }}
+                                className="text-slate-500 hover:text-slate-300"
+                                title="Copy Email Address"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-300 font-mono text-[11px]">{cust.phone || '—'}</span>
+                              {cust.phone && (
+                                <a
+                                  href={`https://wa.me/${cust.phone.replace(/[^0-9]/g, '')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                                  title="Chat with Customer on WhatsApp"
+                                >
+                                  <MessageCircle className="w-3 h-3" />
+                                </a>
+                              )}
+                            </div>
+                          </td>
+
+                          <td className="py-3 px-4 text-slate-300">{cust.city || 'Mumbai'}</td>
+
+                          <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">
+                            {new Date(cust.created_at).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </td>
+
+                          <td className="py-3 px-4">
+                            {cust.isBlocked ? (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full w-max">
+                                  <ShieldAlert className="w-3 h-3 text-red-400" />
+                                  <span>BLOCKED</span>
+                                </span>
+                                {cust.blockedReason && (
+                                  <span className="text-[10px] text-red-400/80 italic truncate max-w-[130px]" title={cust.blockedReason}>
+                                    {cust.blockedReason}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full">
+                                <UserCheck className="w-3 h-3 text-emerald-400" />
+                                <span>ACTIVE</span>
+                              </span>
+                            )}
+                          </td>
+
+                          <td className="py-3 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* Block / Unblock Toggle Button */}
+                              {cust.isBlocked ? (
+                                <button
+                                  onClick={() => handleToggleBlock(cust)}
+                                  className="px-2.5 py-1 bg-emerald-600/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/40 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1"
+                                  title="Unblock customer account"
+                                >
+                                  <UserCheck className="w-3 h-3" />
+                                  <span>Unblock</span>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setBlockPromptCustomer(cust);
+                                    setBlockReasonInput('');
+                                  }}
+                                  className="px-2.5 py-1 bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/40 text-[10px] font-bold rounded-lg transition-all flex items-center gap-1"
+                                  title="Block customer account"
+                                >
+                                  <UserX className="w-3 h-3" />
+                                  <span>Block</span>
+                                </button>
+                              )}
+
+                              {/* View Details */}
+                              <button
+                                onClick={() => setSelectedCustomer(cust)}
+                                className="p-1.5 bg-slate-900 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition-colors"
+                                title="View Customer Details & History"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+
+                              {/* Delete */}
+                              <button
+                                onClick={() => handleDeleteCustomer(cust)}
+                                className="p-1.5 bg-slate-900 hover:bg-red-950/50 text-slate-400 hover:text-red-400 rounded-lg border border-slate-700 transition-colors"
+                                title="Delete Customer Record"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 3: ADVERTISEMENTS & DESCRIPTIONS ================= */}
+        {activeTab === 'advertisement' && (
+          <div className="space-y-6">
+            {/* Live Visual Preview Box */}
+            <div className="bg-slate-800/80 rounded-2xl border border-slate-700 p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Megaphone className="w-4 h-4 text-yellow-400" />
+                  <h3 className="text-sm font-bold text-white font-display">Live Storefront Campaign Preview</h3>
+                </div>
+                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                  advForm.enabled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-700 text-slate-400'
+                }`}>
+                  {advForm.enabled ? '● CAMPAIGN ACTIVE' : '○ CAMPAIGN DISABLED'}
+                </span>
+              </div>
+
+              {/* Preview 1: Header Top Announcement Bar */}
+              <div className="space-y-1">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">1. Top Navigation Announcement Bar:</span>
+                <div className="bg-gradient-to-r from-[#241a05] via-[#eab308] to-[#1a1403] text-slate-950 text-xs font-bold py-2 px-4 rounded-xl flex items-center justify-center gap-2 text-center shadow-xs">
+                  <Sparkles className="w-3.5 h-3.5 text-slate-900 shrink-0" />
+                  <span>{advForm.announcementText || 'Your announcement text appears here...'}</span>
+                </div>
+              </div>
+
+              {/* Preview 2: Hero Section Spotlight Card */}
+              <div className="space-y-1 pt-2">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">2. In-Store Hero Spotlight Card:</span>
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#121217] via-[#241d0f] to-[#3a2805] text-white p-6 border border-yellow-500/30 shadow-lg">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="space-y-2 max-w-xl">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-widest uppercase bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                        <Sparkles className="w-3 h-3 text-amber-300" />
+                        <span>{advForm.bannerTag || 'ATELIER ANNOUNCEMENT'}</span>
+                      </span>
+                      <h4 className="text-xl font-bold font-display text-white">
+                        {advForm.heroHeadline || 'Campaign Headline'}
+                      </h4>
+                      <p className="text-xs text-slate-300 leading-relaxed">
+                        {advForm.heroSubtitle || 'Advertising copy & description...'}
+                      </p>
+                    </div>
+                    <button className="py-2.5 px-4 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold rounded-xl shadow whitespace-nowrap">
+                      {advForm.heroCtaText || 'Explore Eyewear'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Campaign Form Controls */}
+            <div className="bg-slate-800/90 rounded-2xl border border-slate-700 p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+                <div>
+                  <h3 className="text-base font-bold text-white font-display">Store Advertisement &amp; Banners Manager</h3>
+                  <p className="text-xs text-slate-400">Update announcement bar copy, editorial headlines, and advertising descriptions</p>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700">
+                  <span className="text-xs text-slate-300 font-medium">Enable Banner:</span>
+                  <input
+                    type="checkbox"
+                    checked={advForm.enabled}
+                    onChange={(e) => setAdvForm({ ...advForm, enabled: e.target.checked })}
+                    className="w-4 h-4 accent-yellow-500 rounded cursor-pointer"
+                  />
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Top Header Announcement Bar Text</label>
+                  <input
+                    type="text"
+                    value={advForm.announcementText}
+                    onChange={(e) => setAdvForm({ ...advForm, announcementText: e.target.value })}
+                    placeholder="e.g. ✨ ZEISS PRECISION OPTICS & BESPOKE TITANIUM ATELIER — DISCOVER NEW SEASON 2025"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Campaign Tag / Badge</label>
+                  <input
+                    type="text"
+                    value={advForm.bannerTag}
+                    onChange={(e) => setAdvForm({ ...advForm, bannerTag: e.target.value })}
+                    placeholder="e.g. ATELIER SPOTLIGHT"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Hero CTA Button Text</label>
+                  <input
+                    type="text"
+                    value={advForm.heroCtaText}
+                    onChange={(e) => setAdvForm({ ...advForm, heroCtaText: e.target.value })}
+                    placeholder="e.g. Explore Eyewear Vitrine"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Hero Headline Title</label>
+                  <input
+                    type="text"
+                    value={advForm.heroHeadline}
+                    onChange={(e) => setAdvForm({ ...advForm, heroHeadline: e.target.value })}
+                    placeholder="e.g. ROSHAN CHASMA GHAR BESPOKE ATELIER"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Hero Subtitle &amp; Advertising Description</label>
+                  <textarea
+                    rows={3}
+                    value={advForm.heroSubtitle}
+                    onChange={(e) => setAdvForm({ ...advForm, heroSubtitle: e.target.value })}
+                    placeholder="Extended advertising description..."
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={handleSaveAdv}
+                  className="px-6 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 transition-all active:scale-98"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Save Advertisement &amp; Description Changes</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Flagship Store Address & Contact Settings Module */}
+            <div className="bg-slate-800/90 rounded-2xl border border-slate-700 p-6 space-y-5">
+              <div className="border-b border-slate-700 pb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-white font-display flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-yellow-400" />
+                    <span>Flagship Store Address &amp; Contact Details</span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Changes made here immediately update the store address across the customer storefront (Header, Footer, Contact, Checkout &amp; Home).
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Store Name / Brand Headline</label>
+                  <input
+                    type="text"
+                    value={storeSettingsForm.storeName}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, storeName: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500 font-bold"
+                  />
+                </div>
+
+                <div className="md:col-span-2 space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Full Flagship Store Address</label>
+                  <textarea
+                    rows={2}
+                    value={storeSettingsForm.address}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, address: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500 leading-relaxed"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Short Address / Display Line</label>
+                  <input
+                    type="text"
+                    value={storeSettingsForm.shortAddress}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, shortAddress: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Landmark &amp; Area</label>
+                  <input
+                    type="text"
+                    value={storeSettingsForm.landmark}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, landmark: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">City &amp; State</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={storeSettingsForm.city}
+                      onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, city: e.target.value })}
+                      placeholder="City"
+                      className="w-1/2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                    />
+                    <input
+                      type="text"
+                      value={storeSettingsForm.state}
+                      onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, state: e.target.value })}
+                      placeholder="State"
+                      className="w-1/2 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Pincode</label>
+                  <input
+                    type="text"
+                    value={storeSettingsForm.pincode}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, pincode: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Phone / Telephone</label>
+                  <input
+                    type="text"
+                    value={storeSettingsForm.phone}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, phone: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">WhatsApp Number</label>
+                  <input
+                    type="text"
+                    value={storeSettingsForm.whatsapp}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, whatsapp: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Store Email</label>
+                  <input
+                    type="email"
+                    value={storeSettingsForm.email}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, email: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300">Working Hours</label>
+                  <input
+                    type="text"
+                    value={storeSettingsForm.workingHours}
+                    onChange={(e) => setStoreSettingsForm({ ...storeSettingsForm, workingHours: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={handleSaveStoreSettings}
+                  className="px-6 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 transition-all active:scale-98"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Save Flagship Address &amp; Store Details</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Section 2: Product Marketing Copy & Description Editor */}
+            <div className="bg-slate-800/90 rounded-2xl border border-slate-700 p-6 space-y-5">
+              <div className="border-b border-slate-700 pb-3">
+                <h3 className="text-base font-bold text-white font-display">Product Description &amp; Craft Details Editor</h3>
+                <p className="text-xs text-slate-400">Select any frame from the live catalog to change its marketing description and subtitle</p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Select Frame to Edit Description:</label>
+                  <select
+                    value={advSelectedProduct?.id || ''}
+                    onChange={(e) => {
+                      const found = products.find((p) => p.id === e.target.value);
+                      if (found) handleSelectProductForDesc(found);
+                    }}
+                    className="w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                  >
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.shapeLabel} · ₹{p.price.toLocaleString()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-300">Subtitle / Category Line</label>
+                    <input
+                      type="text"
+                      value={tempSubtitle}
+                      onChange={(e) => setTempSubtitle(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-slate-300">Badge Text (Optional)</label>
+                    <input
+                      type="text"
+                      value={tempBadge}
+                      onChange={(e) => setTempBadge(e.target.value)}
+                      placeholder="e.g. BESTSELLER, LIMITED EDITION"
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-semibold text-slate-300">Frame Description</label>
+                    <textarea
+                      rows={3}
+                      value={tempDesc}
+                      onChange={(e) => setTempDesc(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-semibold text-slate-300">Artisan Craft &amp; Material Details</label>
+                    <textarea
+                      rows={2}
+                      value={tempCraft}
+                      onChange={(e) => setTempCraft(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={handleSaveProductDescription}
+                    className="px-5 py-2.5 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 transition-all"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Save Frame Description</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= TAB 4: CUSTOMER ORDERS ================= */}
         {activeTab === 'orders' && (
           <div className="bg-slate-800/90 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
             <div className="p-4 border-b border-slate-700 flex items-center justify-between">
@@ -919,7 +1788,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <tbody className="divide-y divide-slate-700/60">
                   {orders.map((ord) => (
                     <tr key={ord.id} className="hover:bg-slate-750/50">
-                      <td className="py-3 px-4 font-mono font-bold text-pink-400">{ord.id}</td>
+                      <td className="py-3 px-4 font-mono font-bold text-yellow-400">{ord.id}</td>
                       <td className="py-3 px-4">
                         <div className="font-semibold text-white">{ord.customerName}</div>
                         <div className="text-[11px] text-slate-400 flex items-center gap-1">
@@ -952,7 +1821,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                               ? 'border-sky-500/50 text-sky-400'
                               : ord.status === 'In Lab Edging'
                               ? 'border-amber-500/50 text-amber-400'
-                              : 'border-pink-500/50 text-pink-400'
+                              : 'border-yellow-500/50 text-yellow-400'
                           }`}
                         >
                           <option value="Pending">Pending</option>
@@ -1059,7 +1928,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 <div key={rx.id} className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-slate-750/50">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-bold text-pink-400">{rx.id}</span>
+                      <span className="font-mono text-xs font-bold text-yellow-400">{rx.id}</span>
                       <span className="font-semibold text-sm text-white">{rx.patientName}</span>
                       <span className="text-xs text-slate-400">({rx.phone})</span>
                     </div>
@@ -1089,7 +1958,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                           setPrescriptions(prescriptions.map((r) => (r.id === rx.id ? { ...r, status: 'Verified' } : r)));
                           notify(`Prescription ${rx.id} verified and sent to edging lab!`);
                         }}
-                        className="px-3 py-1.5 bg-[#e01a76] hover:bg-pink-600 text-white text-xs font-bold rounded-xl transition-all"
+                        className="px-3 py-1.5 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl transition-all"
                       >
                         Verify &amp; Send to Lab
                       </button>
@@ -1157,21 +2026,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               <div className="flex border-b border-slate-800 pb-2 text-xs font-semibold gap-3">
                 <button
                   onClick={() => { setActivePhotoTab('url'); setImageLoadError(false); }}
-                  className={`pb-1 flex items-center gap-1.5 ${activePhotoTab === 'url' ? 'text-pink-400 border-b-2 border-pink-400 font-bold' : 'text-slate-400'}`}
+                  className={`pb-1 flex items-center gap-1.5 ${activePhotoTab === 'url' ? 'text-yellow-400 border-b-2 border-yellow-400 font-bold' : 'text-slate-400'}`}
                 >
                   <LinkIcon className="w-3 h-3" />
                   <span>Paste External URL</span>
                 </button>
                 <button
                   onClick={() => { setActivePhotoTab('preset'); setImageLoadError(false); }}
-                  className={`pb-1 flex items-center gap-1.5 ${activePhotoTab === 'preset' ? 'text-pink-400 border-b-2 border-pink-400 font-bold' : 'text-slate-400'}`}
+                  className={`pb-1 flex items-center gap-1.5 ${activePhotoTab === 'preset' ? 'text-yellow-400 border-b-2 border-yellow-400 font-bold' : 'text-slate-400'}`}
                 >
                   <Sparkles className="w-3 h-3" />
                   <span>Showroom Presets</span>
                 </button>
                 <button
                   onClick={() => { setActivePhotoTab('upload'); setImageLoadError(false); }}
-                  className={`pb-1 flex items-center gap-1.5 ${activePhotoTab === 'upload' ? 'text-pink-400 border-b-2 border-pink-400 font-bold' : 'text-slate-400'}`}
+                  className={`pb-1 flex items-center gap-1.5 ${activePhotoTab === 'upload' ? 'text-yellow-400 border-b-2 border-yellow-400 font-bold' : 'text-slate-400'}`}
                 >
                   <Upload className="w-3 h-3" />
                   <span>Upload File</span>
@@ -1190,7 +2059,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       setTempPhotoUrl(e.target.value);
                       setImageLoadError(false);
                     }}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-pink-500 font-mono"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-yellow-500 font-mono"
                   />
                   <p className="text-[10px] text-slate-400">
                     Paste any public image link. It will update this frame instantly across Home, Catalog, and Product Detail.
@@ -1206,7 +2075,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       key={idx}
                       onClick={() => { setTempPhotoUrl(preset.src); setImageLoadError(false); }}
                       className={`p-1.5 rounded-xl border bg-white flex flex-col items-center gap-1 transition-all ${
-                        tempPhotoUrl === preset.src ? 'border-pink-500 ring-2 ring-pink-500' : 'border-slate-700 hover:border-slate-400'
+                        tempPhotoUrl === preset.src ? 'border-yellow-500 ring-2 ring-yellow-500' : 'border-slate-700 hover:border-slate-400'
                       }`}
                     >
                       <div className="w-full aspect-square flex items-center justify-center overflow-hidden">
@@ -1265,7 +2134,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
 
                 <button
                   onClick={handleSavePhoto}
-                  className="px-5 py-2 bg-[#e01a76] hover:bg-pink-600 text-white text-xs font-bold rounded-xl shadow-md"
+                  className="px-5 py-2 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl shadow-md"
                 >
                   Save Photo
                 </button>
@@ -1303,7 +2172,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     type="number"
                     value={tempPrice}
                     onChange={(e) => setTempPrice(Number(e.target.value))}
-                    className="w-full pl-8 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-lg font-bold text-white focus:outline-none focus:border-pink-500 font-display"
+                    className="w-full pl-8 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-lg font-bold text-white focus:outline-none focus:border-yellow-500 font-display"
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1">This is the final checkout price shown to customers.</p>
@@ -1319,7 +2188,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     type="number"
                     value={tempOriginalPrice}
                     onChange={(e) => setTempOriginalPrice(Number(e.target.value))}
-                    className="w-full pl-8 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-base font-medium text-slate-300 focus:outline-none focus:border-pink-500 font-display"
+                    className="w-full pl-8 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-base font-medium text-slate-300 focus:outline-none focus:border-yellow-500 font-display"
                   />
                 </div>
               </div>
@@ -1344,7 +2213,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
               </button>
               <button
                 onClick={handleSavePrice}
-                className="px-5 py-2 bg-[#e01a76] hover:bg-pink-600 text-white text-xs font-bold rounded-xl shadow-md"
+                className="px-5 py-2 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl shadow-md"
               >
                 Save New Price
               </button>
@@ -1380,7 +2249,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     placeholder="e.g. Roshan Heritage Sovereign Square"
                     value={newProduct.name}
                     onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                   />
                 </div>
 
@@ -1391,7 +2260,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     required
                     value={newProduct.price}
                     onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-bold focus:outline-none focus:border-pink-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-bold focus:outline-none focus:border-yellow-500"
                   />
                 </div>
 
@@ -1401,7 +2270,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     type="number"
                     value={newProduct.originalPrice}
                     onChange={(e) => setNewProduct({ ...newProduct, originalPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                   />
                 </div>
 
@@ -1410,7 +2279,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <select
                     value={newProduct.category}
                     onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value as FrameCategory })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                   >
                     <option value="eyeglasses">Eyeglasses</option>
                     <option value="sunglasses">Sunglasses</option>
@@ -1424,7 +2293,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <select
                     value={newProduct.shape}
                     onChange={(e) => setNewProduct({ ...newProduct, shape: e.target.value as FrameShape })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                   >
                     <option value="square">Square</option>
                     <option value="round">Round</option>
@@ -1440,7 +2309,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                   <select
                     value={newProduct.material}
                     onChange={(e) => setNewProduct({ ...newProduct, material: e.target.value as FrameMaterial })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                   >
                     <option value="Pure Feather Titanium">Pure Feather Titanium</option>
                     <option value="Handmade Acetate">Handmade Acetate</option>
@@ -1456,7 +2325,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                     placeholder="e.g. BESTSELLER, NEW ARRIVAL"
                     value={newProduct.badge}
                     onChange={(e) => setNewProduct({ ...newProduct, badge: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                   />
                 </div>
 
@@ -1468,7 +2337,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                       placeholder="Paste image link or choose below..."
                       value={newProduct.image || ''}
                       onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+                      className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
                     />
                   </div>
 
@@ -1479,7 +2348,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                         key={idx}
                         onClick={() => setNewProduct({ ...newProduct, image: preset.src })}
                         className={`w-10 h-10 rounded-lg bg-white border p-0.5 shrink-0 ${
-                          newProduct.image === preset.src ? 'border-pink-500 ring-2 ring-pink-500' : 'border-slate-700'
+                          newProduct.image === preset.src ? 'border-yellow-500 ring-2 ring-yellow-500' : 'border-slate-700'
                         }`}
                         title={preset.title}
                       >
@@ -1500,9 +2369,411 @@ export const AdminPage: React.FC<AdminPageProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#e01a76] hover:bg-pink-600 text-white text-xs font-bold rounded-xl shadow-md"
+                  className="px-5 py-2 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl shadow-md"
                 >
                   Add Frame to Store
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: CUSTOMER DETAILS & ORDER HISTORY ================= */}
+      {selectedCustomer && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-6 space-y-6 shadow-2xl my-8">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-yellow-500 to-purple-600 text-white font-bold text-lg flex items-center justify-center shadow-lg shadow-yellow-900/20">
+                  {selectedCustomer.fullName.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-white font-display">
+                      {selectedCustomer.fullName}
+                    </h3>
+                    {selectedCustomer.isBlocked ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/40 px-2 py-0.5 rounded-full">
+                        <ShieldAlert className="w-3 h-3 text-red-400" />
+                        <span>ACCOUNT BLOCKED</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full">
+                        <UserCheck className="w-3 h-3 text-emerald-400" />
+                        <span>ACTIVE PATRON</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 font-mono">ID: {selectedCustomer.id}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedCustomer(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Block Banner if Blocked */}
+            {selectedCustomer.isBlocked && (
+              <div className="bg-red-950/50 border border-red-500/40 rounded-2xl p-4 flex items-start gap-3">
+                <ShieldAlert className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <h4 className="text-xs font-bold text-red-200">Customer Access Suspended</h4>
+                  <p className="text-xs text-red-300/90">
+                    Reason: <span className="font-semibold text-white">"{selectedCustomer.blockedReason || 'Administrative suspension'}"</span>
+                  </p>
+                  <p className="text-[11px] text-red-400">
+                    This patron cannot log in, place orders, or book eye tests while blocked.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleToggleBlock(selectedCustomer)}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-colors shadow shrink-0"
+                >
+                  Unblock Now
+                </button>
+              </div>
+            )}
+
+            {/* Profile Info Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                  <Mail className="w-3 h-3 text-yellow-400" />
+                  <span>Email Address</span>
+                </span>
+                <div className="flex items-center justify-between">
+                  <a href={`mailto:${selectedCustomer.email}`} className="text-white hover:text-yellow-400 font-medium">
+                    {selectedCustomer.email}
+                  </a>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedCustomer.email);
+                      notify(`Copied ${selectedCustomer.email}`);
+                    }}
+                    className="text-slate-500 hover:text-slate-300 p-1"
+                    title="Copy Email"
+                  >
+                    <Copy className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                  <Phone className="w-3 h-3 text-emerald-400" />
+                  <span>Contact Phone</span>
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-mono font-medium">{selectedCustomer.phone || 'Not provided'}</span>
+                  {selectedCustomer.phone && (
+                    <a
+                      href={`https://wa.me/${selectedCustomer.phone.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-[10px] font-bold flex items-center gap-1"
+                    >
+                      <MessageCircle className="w-3 h-3" />
+                      <span>WhatsApp</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                  <MapPin className="w-3 h-3 text-sky-400" />
+                  <span>City / Location</span>
+                </span>
+                <span className="text-white font-medium block">{selectedCustomer.city || 'Mumbai, Maharashtra'}</span>
+              </div>
+
+              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-3 space-y-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                  <Calendar className="w-3 h-3 text-purple-400" />
+                  <span>Account Registered</span>
+                </span>
+                <span className="text-white font-medium block">
+                  {new Date(selectedCustomer.created_at).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* Customer Orders History Section */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShoppingBag className="w-3.5 h-3.5 text-yellow-400" />
+                  <span>Orders Placed by {selectedCustomer.fullName}</span>
+                </h4>
+                <span className="text-[11px] text-slate-400 font-mono">
+                  {orders.filter(o => 
+                    o.customerName.toLowerCase() === selectedCustomer.fullName.toLowerCase() ||
+                    (selectedCustomer.phone && o.phone.includes(selectedCustomer.phone.replace(/[^0-9]/g, '').slice(-8)))
+                  ).length} Orders Found
+                </span>
+              </div>
+
+              <div className="bg-slate-950/80 rounded-2xl border border-slate-800 overflow-hidden">
+                {orders.filter(o => 
+                  o.customerName.toLowerCase() === selectedCustomer.fullName.toLowerCase() ||
+                  (selectedCustomer.phone && o.phone.includes(selectedCustomer.phone.replace(/[^0-9]/g, '').slice(-8)))
+                ).length === 0 ? (
+                  <div className="p-6 text-center text-slate-400 text-xs">
+                    <ShoppingBag className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                    <span>No previous optical orders recorded yet for this customer.</span>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-800 text-xs">
+                    {orders.filter(o => 
+                      o.customerName.toLowerCase() === selectedCustomer.fullName.toLowerCase() ||
+                      (selectedCustomer.phone && o.phone.includes(selectedCustomer.phone.replace(/[^0-9]/g, '').slice(-8)))
+                    ).map(ord => (
+                      <div key={ord.id} className="p-3 flex items-center justify-between gap-3 hover:bg-slate-900/50">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-yellow-400">{ord.id}</span>
+                            <span className="text-white font-medium">{ord.productName}</span>
+                          </div>
+                          <span className="text-[11px] text-slate-400">{ord.date} · {ord.paymentMethod}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-emerald-400 font-bold font-display block">₹{ord.price.toLocaleString()}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-slate-300">
+                            {ord.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Actions Footer */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-3 border-t border-slate-800">
+              <button
+                onClick={() => handleDeleteCustomer(selectedCustomer)}
+                className="px-3.5 py-2 bg-red-950/40 hover:bg-red-900 text-red-300 hover:text-white rounded-xl text-xs font-semibold border border-red-800/50 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Patron Record</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                {selectedCustomer.isBlocked ? (
+                  <button
+                    onClick={() => handleToggleBlock(selectedCustomer)}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow"
+                  >
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>Unblock Customer</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setBlockPromptCustomer(selectedCustomer);
+                      setBlockReasonInput('');
+                    }}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow"
+                  >
+                    <UserX className="w-3.5 h-3.5" />
+                    <span>Block Customer</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setSelectedCustomer(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-semibold rounded-xl"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: BLOCK CUSTOMER PROMPT ================= */}
+      {blockPromptCustomer && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-red-500/40 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2 text-red-400">
+                <ShieldAlert className="w-5 h-5" />
+                <h3 className="text-base font-bold text-white font-display">Block Customer</h3>
+              </div>
+              <button
+                onClick={() => setBlockPromptCustomer(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <p className="text-slate-300">
+                Are you sure you want to block <strong className="text-white">{blockPromptCustomer.fullName}</strong> ({blockPromptCustomer.email})?
+              </p>
+              <p className="text-slate-400 text-[11px]">
+                Blocking will terminate their active session immediately and block them from logging in or placing orders.
+              </p>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1.5">Select Common Reason:</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    'Repeated fake COD order cancellations',
+                    'Suspicious payment / chargeback fraud',
+                    'Abusive language / harassment',
+                    'High return rate / trial abuse',
+                    'Administrative security review',
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setBlockReasonInput(preset)}
+                      className={`text-[10px] px-2.5 py-1 rounded-lg border transition-all text-left ${
+                        blockReasonInput === preset
+                          ? 'bg-red-500/30 text-red-200 border-red-400'
+                          : 'bg-slate-950 text-slate-400 border-slate-700 hover:border-slate-500'
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Custom Block Reason Note:</label>
+                <textarea
+                  rows={2}
+                  value={blockReasonInput}
+                  onChange={(e) => setBlockReasonInput(e.target.value)}
+                  placeholder="Enter reason for suspension..."
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setBlockPromptCustomer(null)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-semibold rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleToggleBlock(blockPromptCustomer, blockReasonInput)}
+                className="px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl shadow-lg transition-all"
+              >
+                Confirm &amp; Block Customer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: REGISTER PATRON ================= */}
+      {isAddCustomerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div>
+                <h3 className="text-base font-bold text-white font-display">Register New Patron</h3>
+                <p className="text-xs text-slate-400">Add a customer account directly into store records</p>
+              </div>
+              <button
+                onClick={() => setIsAddCustomerOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCustomer} className="space-y-3 text-xs">
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ananya Deshmukh"
+                  value={newCustForm.fullName}
+                  onChange={(e) => setNewCustForm({ ...newCustForm, fullName: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="ananya@example.com"
+                  value={newCustForm.email}
+                  onChange={(e) => setNewCustForm({ ...newCustForm, email: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300 block mb-1">Contact Phone</label>
+                <input
+                  type="text"
+                  placeholder="+91 98200 12345"
+                  value={newCustForm.phone}
+                  onChange={(e) => setNewCustForm({ ...newCustForm, phone: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500 font-mono"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">City / Region</label>
+                  <input
+                    type="text"
+                    value={newCustForm.city}
+                    onChange={(e) => setNewCustForm({ ...newCustForm, city: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-slate-300 block mb-1">Initial Password</label>
+                  <input
+                    type="text"
+                    value={newCustForm.password}
+                    onChange={(e) => setNewCustForm({ ...newCustForm, password: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-yellow-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsAddCustomerOpen(false)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-semibold rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-[#eab308] hover:bg-yellow-400 hover:text-slate-950 text-white text-xs font-bold rounded-xl shadow-md transition-all"
+                >
+                  Register Patron
                 </button>
               </div>
             </form>

@@ -70,10 +70,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         onClick={onOpenBookEyeTest}
         className="flex-1 flex flex-col items-center justify-center py-0.5 transition-transform active:scale-95 min-h-[44px]"
       >
-        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#e01a76] to-[#ff4081] text-white flex items-center justify-center shadow-md shadow-[#e01a76]/30 border border-white/20 -mt-3">
-          <Calendar className="w-4 h-4 text-white" />
+        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-400 text-slate-950 flex items-center justify-center shadow-md shadow-yellow-500/30 border border-yellow-300 -mt-3">
+          <Calendar className="w-4 h-4 text-slate-950 stroke-[2.5]" />
         </div>
-        <span className="text-[10px] font-bold text-pink-300 tracking-tight mt-0.5">
+        <span className="text-[10px] font-bold text-yellow-400 tracking-tight mt-0.5">
           Book Test
         </span>
       </button>
@@ -88,7 +88,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         <div className={`relative p-1 rounded-full ${isCart ? 'bg-white/10' : ''}`}>
           <ShoppingBag className="w-4 h-4" />
           {cartCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 bg-[#e01a76] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 min-w-[15px] h-[15px] px-1 bg-yellow-500 text-slate-950 text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
               {cartCount}
             </span>
           )}

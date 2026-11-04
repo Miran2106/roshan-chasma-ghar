@@ -10,7 +10,6 @@ import { CartPage } from './pages/CartPage';
 import { ClinicPage } from './pages/ClinicPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
-import { OffersPage } from './pages/OffersPage';
 import { AdminPage } from './pages/AdminPage';
 import { VirtualTryOnModal } from './components/VirtualTryOnModal';
 import { BookEyeTestModal } from './components/BookEyeTestModal';
@@ -19,14 +18,16 @@ import { PrescriptionUploadModal } from './components/PrescriptionUploadModal';
 import { HomeTryOnModal } from './components/HomeTryOnModal';
 import { SearchModal } from './components/SearchModal';
 import { WishlistDrawer } from './components/WishlistDrawer';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthModal } from './components/AuthModal';
 import { UserAccountDrawer } from './components/UserAccountDrawer';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { fetchProducts } from './services/supabaseService';
+import { StoreAdvertisement, DEFAULT_ADVERTISEMENT } from './types/advertisement';
 import { Check, Sparkles, ShieldCheck } from 'lucide-react';
 
-export default function App() {
+function AppContent() {
+  const { user, openAuthModal } = useAuth();
   const [currentPage, setCurrentPage] = useState<string>('home');
   const [selectedProductId, setSelectedProductId] = useState<string>('aurelia-titanium-round');
 
@@ -123,37 +124,81 @@ export default function App() {
     showToast('Catalog restored to showroom default');
   };
 
-  // Initial cart items matching Image 5 (Aurelia Sovereign Round + Kallan Pantoscopic Acetate)
+  // Initial cart: 100% empty by default (clean bag as requested)
   const [cart, setCart] = useState<CartItem[]>(() => {
-    const aurelia = PRODUCTS.find((p) => p.id === 'aurelia-titanium-round') || PRODUCTS[0];
-    const kallan = PRODUCTS.find((p) => p.id === 'kallan-pantoscopic-acetate') || PRODUCTS[2];
-
-    return [
-      {
-        cartId: 'item-init-1',
-        product: aurelia,
-        selectedColor: 'Champagne Gold',
-        selectedLens: 'zeiss-progressive',
-        lensPrice: 0, // In Image 5 final price is ₹4,899
-        quantity: 1,
-      },
-      {
-        cartId: 'item-init-2',
-        product: kallan,
-        selectedColor: 'Tokyo Tortoise',
-        selectedLens: 'zero-power',
-        lensPrice: 0, // In Image 5 final price is ₹3,150
-        quantity: 1,
-      },
-    ];
+    try {
+      const isCleared = localStorage.getItem('roshan_cleared_lists_v5');
+      if (!isCleared) {
+        localStorage.removeItem('roshan_cart');
+        localStorage.setItem('roshan_cleared_lists_v5', 'true');
+        return [];
+      }
+      const saved = localStorage.getItem('roshan_cart');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
   });
 
-  // Initial Wishlist matching count '3' in screenshot badge
-  const [wishlistIds, setWishlistIds] = useState<string[]>([
-    'aero-black-pantos',
-    'optique-feather-rimless',
-    'havana-bold-square',
-  ]);
+  useEffect(() => {
+    localStorage.setItem('roshan_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  // Initial wishlist: 100% empty by default (clean like list as requested)
+  const [wishlistIds, setWishlistIds] = useState<string[]>(() => {
+    try {
+      const isCleared = localStorage.getItem('roshan_cleared_wishlist_v5');
+      if (!isCleared) {
+        localStorage.removeItem('roshan_wishlist');
+        localStorage.setItem('roshan_cleared_wishlist_v5', 'true');
+        return [];
+      }
+      const saved = localStorage.getItem('roshan_wishlist');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('roshan_wishlist', JSON.stringify(wishlistIds));
+  }, [wishlistIds]);
+
+  const handleClearCart = () => {
+    setCart([]);
+    localStorage.removeItem('roshan_cart');
+    showToast('All items cleared from your bag');
+  };
+
+  const handleClearWishlist = () => {
+    setWishlistIds([]);
+    localStorage.removeItem('roshan_wishlist');
+    showToast('All saved frames cleared from like list');
+  };
+
+  // Advertisement & Promo Banners state (Editable in Admin Side)
+  const [advertisement, setAdvertisement] = useState<StoreAdvertisement>(() => {
+    try {
+      const saved = localStorage.getItem('roshan_store_advertisement');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          return { ...DEFAULT_ADVERTISEMENT, ...parsed };
+        }
+      }
+    } catch {}
+    return DEFAULT_ADVERTISEMENT;
+  });
+
+  const handleUpdateAdvertisement = (updated: StoreAdvertisement) => {
+    setAdvertisement(updated);
+    localStorage.setItem('roshan_store_advertisement', JSON.stringify(updated));
+    showToast('Store advertisement & announcements updated');
+  };
 
   // Modals state
   const [bookEyeTestOpen, setBookEyeTestOpen] = useState(false);
@@ -214,6 +259,12 @@ export default function App() {
     color?: string,
     lensType: LensOpticalType = 'zero-power'
   ) => {
+    if (!user) {
+      showToast('⚠️ Please login to your account first to add frames to your bag');
+      openAuthModal('signin');
+      return;
+    }
+
     const lensObj = LENS_OPTIONS.find((l) => l.id === lensType) || LENS_OPTIONS[0];
     const chosenColor = color || product.defaultColor;
 
@@ -297,6 +348,12 @@ export default function App() {
 
   // Wishlist operations
   const handleToggleWishlist = (product: EyewearProduct) => {
+    if (!user) {
+      showToast('⚠️ Please login to your account first to save frames to your like list');
+      openAuthModal('signin');
+      return;
+    }
+
     if (wishlistIds.includes(product.id)) {
       setWishlistIds((prev) => prev.filter((id) => id !== product.id));
       showToast(`Removed from saved frames`);
@@ -311,12 +368,11 @@ export default function App() {
     products.find((p) => p.id === selectedProductId) || products[0];
 
   return (
-    <AuthProvider>
-      <div className="min-h-screen flex flex-col bg-[#fbf8ff] text-[#1b1b20] pb-16 lg:pb-0">
-        {/* Toast Notification */}
+    <div className="min-h-screen flex flex-col bg-[#fbf8ff] text-[#1b1b20] pb-16 lg:pb-0">
+      {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#121217] text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-semibold border border-white/10 animate-in slide-in-from-bottom-5">
-          <div className="w-5 h-5 rounded-full bg-[#e01a76] text-white flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-yellow-500 text-slate-950 flex items-center justify-center font-bold">
             <Check className="w-3 h-3 stroke-[3]" />
           </div>
           <span>{toastMessage}</span>
@@ -332,6 +388,7 @@ export default function App() {
         onOpenBookEyeTest={() => setBookEyeTestOpen(true)}
         onOpenSearch={() => setSearchOpen(true)}
         onOpenWishlist={() => setWishlistOpen(true)}
+        advertisement={advertisement}
       />
 
       {/* Main View Router */}
@@ -346,6 +403,7 @@ export default function App() {
             onToggleWishlist={handleToggleWishlist}
             wishlistIds={wishlistIds}
             onAddToCart={(p) => handleAddToCart(p)}
+            advertisement={advertisement}
           />
         )}
 
@@ -381,6 +439,7 @@ export default function App() {
             cartItems={cart}
             onUpdateQuantity={handleUpdateQuantity}
             onRemoveItem={handleRemoveItem}
+            onClearCart={handleClearCart}
             onNavigate={handleNavigate}
             onOpenPrescriptionModal={() => setPrescriptionModalOpen(true)}
             attachedPrescription={attachedPrescription}
@@ -404,14 +463,6 @@ export default function App() {
 
         {currentPage === 'contact' && <ContactPage />}
 
-        {currentPage === 'offers' && (
-          <OffersPage
-            onNavigate={handleNavigate}
-            onOpenHomeTryOn={() => setHomeTryOnOpen(true)}
-            onOpenBookEyeTest={() => setBookEyeTestOpen(true)}
-          />
-        )}
-
         {currentPage === 'admin' && (
           <AdminPage
             products={products}
@@ -422,6 +473,10 @@ export default function App() {
             onResetFactoryProducts={handleResetFactoryProducts}
             onNavigate={handleNavigate}
             onQuickView={(p) => setQuickViewProduct(p)}
+            advertisement={advertisement}
+            onUpdateAdvertisement={handleUpdateAdvertisement}
+            onClearCart={handleClearCart}
+            onClearWishlist={handleClearWishlist}
           />
         )}
       </main>
@@ -512,6 +567,7 @@ export default function App() {
         onRemoveFromWishlist={(id) => {
           setWishlistIds((prev) => prev.filter((item) => item !== id));
         }}
+        onClearWishlist={handleClearWishlist}
         onAddToCart={(p) => handleAddToCart(p)}
         onOpenVirtualTryOn={(p) => {
           setWishlistOpen(false);
@@ -532,15 +588,22 @@ export default function App() {
           className={`px-4 py-2.5 rounded-full font-bold text-xs shadow-2xl flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 border ${
             currentPage === 'admin'
               ? 'bg-slate-900 hover:bg-slate-800 text-white border-slate-700 shadow-slate-950/50'
-              : 'bg-[#e01a76] hover:bg-[#b7005d] text-white border-pink-400/40 shadow-pink-600/40'
+              : 'bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold border-yellow-300 shadow-yellow-500/40'
           }`}
           title={currentPage === 'admin' ? 'Switch to Customer Storefront' : 'Open Store Admin Side (Change Photos & Prices)'}
         >
-          <ShieldCheck className="w-4 h-4 text-white" />
-          <span>{currentPage === 'admin' ? '👁️ View Storefront' : '⚙️ Store Admin Side'}</span>
+          <ShieldCheck className="w-4 h-4 text-slate-950" />
+          <span>{currentPage === 'admin' ? '👁️ View Storefront' : '⚙️ Store Admin (Admin Only)'}</span>
         </button>
       </div>
-      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 }

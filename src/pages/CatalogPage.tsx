@@ -165,8 +165,8 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
       {/* ================= HEADER & CATEGORY TABS ================= */}
       <section className="bg-[#f0ecf4]/60 py-10 px-4 sm:px-6 lg:px-8 border-b border-slate-200">
         <div className="max-w-7xl mx-auto text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/80 rounded-full border border-slate-200 text-[#e01a76] text-xs font-bold tracking-wider uppercase">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/80 rounded-full border border-slate-200 text-yellow-600 text-xs font-bold tracking-wider uppercase">
+            <Sparkles className="w-3.5 h-3.5 text-yellow-600" />
             <span>ATELIER OPTICAL COLLECTION 2025</span>
           </div>
 
@@ -188,7 +188,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`py-2 px-3.5 sm:px-4 text-xs font-semibold rounded-full transition-all shrink-0 whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#e01a76] text-white shadow-sm'
+                      ? 'bg-yellow-500 text-slate-950 font-bold shadow-sm'
                       : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                   }`}
                 >
@@ -226,8 +226,8 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
             {/* Right Curated Box */}
             <div className="lg:col-span-5 p-8 flex flex-col justify-between bg-white space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-[#e01a76] uppercase tracking-wider">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-yellow-600 uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5 text-yellow-600" />
                   <span>OPTICIAN CURATED CHOICE</span>
                 </div>
 
@@ -246,7 +246,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                   <span className="text-xs text-slate-400 line-through">
                     ₹11,500
                   </span>
-                  <span className="text-xs font-bold text-[#e01a76] bg-pink-50 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-md">
                     SAVE 35%
                   </span>
                 </div>
@@ -255,7 +255,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
                 <button
                   onClick={() => onAddToCart(spotlightProduct)}
-                  className="flex-1 py-3 px-4 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+                  className="flex-1 py-3 px-4 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
                 >
                   <Check className="w-4 h-4" />
                   <span>SELECT LENSES &amp; BUY</span>
@@ -265,7 +265,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                   onClick={() => onOpenVirtualTryOn(spotlightProduct)}
                   className="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xl transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <Eye className="w-3.5 h-3.5 text-[#e01a76]" />
+                  <Eye className="w-3.5 h-3.5 text-yellow-600" />
                   <span>3D TRY-ON</span>
                 </button>
               </div>
@@ -290,7 +290,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               onClick={() => setMobileFilterOpen(true)}
               className="lg:hidden py-2 px-3 bg-white border border-slate-300 rounded-lg text-xs font-medium flex items-center gap-1.5"
             >
-              <Filter className="w-3.5 h-3.5 text-[#e01a76]" />
+              <Filter className="w-3.5 h-3.5 text-yellow-600" />
               <span>Filters</span>
             </button>
 
@@ -302,7 +302,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                 placeholder="Search shape, material, code..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-yellow-500 focus:bg-white"
               />
             </div>
 
@@ -310,7 +310,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:border-[#e01a76]"
+              className="py-1.5 px-3 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-700 focus:outline-none focus:border-yellow-500"
             >
               <option value="featured">Sort: Featured Picks</option>
               <option value="price-low">Price: Low to High</option>
@@ -331,7 +331,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                 </span>
                 <button
                   onClick={resetFilters}
-                  className="text-[11px] font-bold text-[#e01a76] hover:underline"
+                  className="text-[11px] font-bold text-yellow-600 hover:underline"
                 >
                   RESET ALL
                 </button>
@@ -354,7 +354,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                           type="checkbox"
                           checked={checked}
                           onChange={() => toggleShape(shape.id)}
-                          className="accent-[#e01a76] w-3.5 h-3.5 rounded"
+                          className="accent-yellow-500 w-3.5 h-3.5 rounded"
                         />
                         <span>{shape.label} ({shape.count})</span>
                       </label>
@@ -381,7 +381,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                             type="checkbox"
                             checked={checked}
                             onChange={() => toggleMaterial(mat.id)}
-                            className="accent-[#e01a76] w-3.5 h-3.5 rounded"
+                            className="accent-yellow-500 w-3.5 h-3.5 rounded"
                           />
                           <span>{mat.id}</span>
                         </div>
@@ -396,7 +396,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               <div className="pt-3 border-t border-slate-100">
                 <div className="flex items-center justify-between text-[11px] font-bold mb-2">
                   <span className="text-slate-500 uppercase tracking-wider">PRICE RANGE</span>
-                  <span className="text-[#e01a76]">₹1,500 – ₹{maxPrice.toLocaleString()}</span>
+                  <span className="text-yellow-600 font-bold">₹1,500 – ₹{maxPrice.toLocaleString()}</span>
                 </div>
                 <input
                   type="range"
@@ -405,7 +405,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                   step="500"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  className="w-full accent-[#e01a76] h-1.5 bg-slate-200 rounded-lg cursor-pointer"
+                  className="w-full accent-yellow-500 h-1.5 bg-slate-200 rounded-lg cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                   <span>₹1.5k</span>
@@ -426,7 +426,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                       onClick={() => setSelectedTone(selectedTone === tone.id ? null : tone.id)}
                       className={`w-6 h-6 rounded-full transition-transform border ${
                         selectedTone === tone.id
-                          ? 'ring-2 ring-offset-2 ring-[#e01a76] scale-110'
+                          ? 'ring-2 ring-offset-2 ring-yellow-500 scale-110'
                           : 'border-slate-300 hover:scale-105'
                       }`}
                       style={{ backgroundColor: tone.hex }}
@@ -452,7 +452,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                             prev.includes(lens) ? prev.filter((l) => l !== lens) : [...prev, lens]
                           )
                         }
-                        className="accent-[#e01a76] w-3.5 h-3.5 rounded"
+                        className="accent-yellow-500 w-3.5 h-3.5 rounded"
                       />
                       <span>{lens}</span>
                     </label>
@@ -462,9 +462,9 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
             </div>
 
             {/* Doctor's Tip Card in Sidebar */}
-            <div className="bg-pink-50/70 p-5 rounded-2xl border border-pink-200/60 space-y-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#e01a76]">
-                <Sparkles className="w-3.5 h-3.5" />
+            <div className="bg-yellow-50/80 p-5 rounded-2xl border border-yellow-200 space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-yellow-800">
+                <Sparkles className="w-3.5 h-3.5 text-yellow-600" />
                 <span>Doctor&apos;s Tip</span>
               </div>
               <p className="text-xs text-slate-700 leading-relaxed">
@@ -472,7 +472,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               </p>
               <button
                 onClick={onOpenBookEyeTest}
-                className="text-xs font-bold text-[#e01a76] hover:underline flex items-center gap-1 pt-1"
+                className="text-xs font-bold text-yellow-700 hover:underline flex items-center gap-1 pt-1"
               >
                 <span>BOOK EYE TEST ONLINE</span>
                 <ArrowRight className="w-3 h-3" />
@@ -488,7 +488,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                 <p className="text-xs text-slate-500">Try expanding your price range or clearing shape filters.</p>
                 <button
                   onClick={resetFilters}
-                  className="py-2 px-4 bg-[#e01a76] text-white text-xs font-semibold rounded-lg"
+                  className="py-2 px-4 bg-yellow-500 text-slate-950 font-bold text-xs rounded-lg"
                 >
                   Reset All Filters
                 </button>
@@ -508,8 +508,6 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                           className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 rounded-md truncate max-w-[85px] sm:max-w-none ${
                             prod.badgeType === 'gold'
                               ? 'bg-amber-100 text-amber-900 border border-amber-200'
-                              : prod.badgeType === 'pink'
-                              ? 'bg-pink-100 text-[#e01a76]'
                               : 'bg-slate-100 text-slate-700'
                           }`}
                         >
@@ -518,10 +516,10 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
 
                         <button
                           onClick={() => onToggleWishlist(prod)}
-                          className="p-1 sm:p-1.5 rounded-full text-slate-400 hover:text-[#e01a76] hover:bg-pink-50 transition-colors"
+                          className="p-1 sm:p-1.5 rounded-full text-slate-400 hover:text-yellow-600 hover:bg-yellow-50 transition-colors"
                           aria-label="Save frame"
                         >
-                          <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-[#e01a76] text-[#e01a76]' : ''}`} />
+                          <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isWishlisted ? 'fill-yellow-500 text-yellow-500' : ''}`} />
                         </button>
                       </div>
 
@@ -555,7 +553,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
 
                         <h3
                           onClick={() => onNavigate('product', prod.id)}
-                          className="text-xs sm:text-sm font-bold text-slate-900 cursor-pointer hover:text-[#e01a76] transition-colors truncate"
+                          className="text-xs sm:text-sm font-bold text-slate-900 cursor-pointer hover:text-yellow-600 transition-colors truncate"
                         >
                           {prod.name}
                         </h3>
@@ -584,7 +582,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                           </button>
                           <button
                             onClick={() => onAddToCart(prod)}
-                            className="flex-1 py-1.5 px-2 sm:px-3 bg-[#e01a76] hover:bg-[#b7005d] text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs whitespace-nowrap"
+                            className="flex-1 py-1.5 px-2 sm:px-3 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs whitespace-nowrap"
                           >
                             BUY NOW
                           </button>
@@ -605,7 +603,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               {visibleCount < filteredProducts.length && (
                 <button
                   onClick={() => setVisibleCount((prev) => prev + 6)}
-                  className="py-2.5 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs"
+                  className="py-2.5 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-2xs"
                 >
                   LOAD MORE FRAMES
                 </button>
@@ -627,7 +625,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Narrative */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#e01a76] uppercase tracking-wider">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-yellow-600 uppercase tracking-wider">
                 <Truck className="w-3.5 h-3.5" />
                 <span>HOME TRY-ON EXPERIENCE</span>
               </div>
@@ -651,7 +649,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
 
                 <button
                   onClick={onOpenHomeTryOn}
-                  className="text-xs font-bold text-slate-700 hover:text-[#e01a76] uppercase tracking-wider flex items-center gap-1"
+                  className="text-xs font-bold text-slate-700 hover:text-yellow-600 uppercase tracking-wider flex items-center gap-1"
                 >
                   <span>HOW IT WORKS</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -662,25 +660,25 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
             {/* Right 4 Grid Value Props */}
             <div className="lg:col-span-5 grid grid-cols-2 gap-3">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-1">
-                <Truck className="w-5 h-5 text-[#e01a76] mx-auto" />
+                <Truck className="w-5 h-5 text-yellow-600 mx-auto" />
                 <h4 className="text-xs font-bold text-slate-900">100% Free</h4>
                 <p className="text-[11px] text-slate-500">Both-Way Delivery</p>
               </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-1">
-                <ShieldCheck className="w-5 h-5 text-[#e01a76] mx-auto" />
+                <ShieldCheck className="w-5 h-5 text-yellow-600 mx-auto" />
                 <h4 className="text-xs font-bold text-slate-900">No Card Hold</h4>
                 <p className="text-[11px] text-slate-500">Zero Hidden Fees</p>
               </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-1">
-                <Sparkles className="w-5 h-5 text-[#e01a76] mx-auto" />
+                <Sparkles className="w-5 h-5 text-yellow-600 mx-auto" />
                 <h4 className="text-xs font-bold text-slate-900">Free PD Ruler</h4>
                 <p className="text-[11px] text-slate-500">Pupillary Tool</p>
               </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-1">
-                <RotateCcw className="w-5 h-5 text-[#e01a76] mx-auto" />
+                <RotateCcw className="w-5 h-5 text-yellow-600 mx-auto" />
                 <h4 className="text-xs font-bold text-slate-900">Optician Call</h4>
                 <p className="text-[11px] text-slate-500">Video Verification</p>
               </div>
@@ -692,7 +690,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <span className="text-[10px] uppercase font-bold tracking-widest text-[#e01a76] font-display">
+              <span className="text-[10px] uppercase font-bold tracking-widest text-yellow-600 font-display">
                 MEDICAL GRADE OPTOMETRY
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 tracking-tight">
@@ -705,7 +703,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
 
             <button
               onClick={() => onNavigate('clinic')}
-              className="text-xs font-bold text-[#e01a76] hover:underline flex items-center gap-1 shrink-0"
+              className="text-xs font-bold text-yellow-600 hover:underline flex items-center gap-1 shrink-0"
             >
               <span>EXPLORE CLINICAL EYE CARE</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -730,7 +728,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-bold text-[#e01a76]">
+                <div className="pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-bold text-yellow-600">
                   <Check className="w-3.5 h-3.5" />
                   <span>{coating.feature}</span>
                 </div>
@@ -761,7 +759,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                       type="checkbox"
                       checked={selectedShapes.includes(shape.id)}
                       onChange={() => toggleShape(shape.id)}
-                      className="accent-[#e01a76]"
+                      className="accent-yellow-500"
                     />
                     <span>{shape.label}</span>
                   </label>
@@ -781,7 +779,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
                 step="500"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-[#e01a76]"
+                className="w-full accent-yellow-500"
               />
             </div>
 
@@ -794,7 +792,7 @@ export const CatalogPage: React.FC<CatalogPageProps> = ({
               </button>
               <button
                 onClick={() => setMobileFilterOpen(false)}
-                className="flex-1 py-2.5 bg-[#e01a76] text-white rounded-lg text-xs font-semibold"
+                className="flex-1 py-2.5 bg-yellow-500 text-slate-950 font-bold rounded-lg text-xs"
               >
                 Apply Filters
               </button>

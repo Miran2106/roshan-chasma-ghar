@@ -54,7 +54,7 @@ export const HomeTryOnModal: React.FC<HomeTryOnModalProps> = ({
           >
             <X className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-2 text-xs font-semibold text-[#e01a76] uppercase tracking-wider mb-1">
+          <div className="flex items-center gap-2 text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-1">
             <Package className="w-3.5 h-3.5" />
             <span>Home Try-On Experience</span>
           </div>
@@ -71,7 +71,7 @@ export const HomeTryOnModal: React.FC<HomeTryOnModalProps> = ({
           <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <span className="text-xs font-bold text-slate-700">
-                Selected: <span className="text-[#e01a76]">{selectedIds.length} of 4 Frames</span>
+                Selected: <span className="text-yellow-700 font-extrabold">{selectedIds.length} of 4 Frames</span>
               </span>
               <span className="text-[11px] text-slate-400">
                 Tap a frame to add or swap
@@ -86,7 +86,7 @@ export const HomeTryOnModal: React.FC<HomeTryOnModalProps> = ({
                   <div
                     key={slotIdx}
                     className={`h-24 rounded-xl border flex flex-col items-center justify-center p-2 relative ${
-                      prod ? 'bg-pink-50/30 border-[#e01a76]' : 'border-dashed border-slate-200 bg-slate-50'
+                      prod ? 'bg-yellow-50/60 border-yellow-500' : 'border-dashed border-slate-200 bg-slate-50'
                     }`}
                   >
                     {prod ? (
@@ -124,7 +124,7 @@ export const HomeTryOnModal: React.FC<HomeTryOnModalProps> = ({
                       onClick={() => toggleSelect(prod.id)}
                       className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                         isSelected
-                          ? 'border-[#e01a76] bg-pink-50/50'
+                          ? 'border-yellow-500 bg-yellow-50/70'
                           : 'border-slate-200 hover:border-slate-300 bg-white'
                       }`}
                     >
@@ -139,7 +139,7 @@ export const HomeTryOnModal: React.FC<HomeTryOnModalProps> = ({
                       </div>
                       <div
                         className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ml-2 ${
-                          isSelected ? 'bg-[#e01a76] text-white' : 'border border-slate-300'
+                          isSelected ? 'bg-yellow-500 text-slate-950 font-bold' : 'border border-slate-300'
                         }`}
                       >
                         {isSelected && <Check className="w-3.5 h-3.5" />}
@@ -154,7 +154,7 @@ export const HomeTryOnModal: React.FC<HomeTryOnModalProps> = ({
               <button
                 disabled={selectedIds.length === 0}
                 onClick={() => setStep('address')}
-                className="w-full py-3.5 bg-[#e01a76] hover:bg-[#b7005d] disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition-colors shadow-md flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-slate-950 font-bold rounded-xl text-sm transition-colors shadow-md flex items-center justify-center gap-2"
               >
                 <span>Continue To Shipping Address ({selectedIds.length}/4)</span>
                 <ArrowRight className="w-4 h-4" />
@@ -229,7 +229,7 @@ export const HomeTryOnModal: React.FC<HomeTryOnModalProps> = ({
               </button>
               <button
                 onClick={() => setStep('confirmed')}
-                className="flex-1 py-3 px-4 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-semibold rounded-xl shadow-md"
+                className="flex-1 py-3 px-4 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold rounded-xl shadow-md transition-all"
               >
                 Confirm Dispatch & Order Free Kit
               </button>

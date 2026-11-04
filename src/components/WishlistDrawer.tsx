@@ -8,6 +8,7 @@ interface WishlistDrawerProps {
   onClose: () => void;
   wishlistItems: EyewearProduct[];
   onRemoveFromWishlist: (id: string) => void;
+  onClearWishlist?: () => void;
   onAddToCart: (product: EyewearProduct) => void;
   onOpenVirtualTryOn: (product: EyewearProduct) => void;
 }
@@ -17,6 +18,7 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
   onClose,
   wishlistItems,
   onRemoveFromWishlist,
+  onClearWishlist,
   onAddToCart,
   onOpenVirtualTryOn,
 }) => {
@@ -31,17 +33,28 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
           {/* Header */}
           <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
             <div className="flex items-center gap-2">
-              <Heart className="w-4 h-4 text-[#e01a76] fill-[#e01a76]" />
+              <Heart className="w-4 h-4 text-yellow-500 fill-yellow-500" />
               <h2 className="text-sm font-bold font-display text-slate-900">
                 Saved Silhouettes ({wishlistItems.length})
               </h2>
             </div>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {wishlistItems.length > 0 && onClearWishlist && (
+                <button
+                  onClick={onClearWishlist}
+                  className="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
+                  title="Clear all saved frames"
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* List */}
@@ -95,14 +108,14 @@ export const WishlistDrawer: React.FC<WishlistDrawerProps> = ({
                         className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
                         title="3D Virtual Try-On"
                       >
-                        <Eye className="w-3.5 h-3.5 text-[#e01a76]" />
+                        <Eye className="w-3.5 h-3.5 text-yellow-600" />
                       </button>
                       <button
                         onClick={() => {
                           onAddToCart(prod);
                           onRemoveFromWishlist(prod.id);
                         }}
-                        className="py-1 px-2 bg-[#e01a76] hover:bg-[#b7005d] text-white text-[11px] font-semibold rounded-lg transition-colors flex items-center gap-1"
+                        className="py-1 px-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold text-[11px] rounded-lg transition-colors flex items-center gap-1 shadow-xs"
                       >
                         <ShoppingBag className="w-3 h-3" />
                         <span>Move</span>

@@ -25,7 +25,7 @@ export const ClinicPage: React.FC<ClinicPageProps> = ({ onOpenBookEyeTest, onNav
       <section className="bg-[#f0ecf4]/60 rounded-3xl p-8 sm:p-12 border border-slate-200">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-7 space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#e01a76] font-display">
+            <span className="text-xs font-bold uppercase tracking-wider text-yellow-600 font-display">
               THE CLINICAL STANDARD · GERMAN WAVEFRONT LAB
             </span>
             <h1 className="text-3xl sm:text-5xl font-extrabold font-display text-slate-900 tracking-tight leading-tight">
@@ -37,7 +37,7 @@ export const ClinicPage: React.FC<ClinicPageProps> = ({ onOpenBookEyeTest, onNav
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 onClick={onOpenBookEyeTest}
-                className="py-3 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md"
+                className="py-3 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md"
               >
                 SCHEDULE EYE EXAMINATION
               </button>
@@ -66,7 +66,7 @@ export const ClinicPage: React.FC<ClinicPageProps> = ({ onOpenBookEyeTest, onNav
       {/* 14-Point Eye Testing Breakdown */}
       <section className="space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-[#e01a76] font-display">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-yellow-600 font-display">
             COMPREHENSIVE PROTOCOL
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900">
@@ -81,9 +81,9 @@ export const ClinicPage: React.FC<ClinicPageProps> = ({ onOpenBookEyeTest, onNav
           {testingSteps.map((step) => (
             <div
               key={step.num}
-              className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-2 hover:border-[#e01a76]/40 transition-colors"
+              className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-2 hover:border-yellow-500/40 transition-colors"
             >
-              <span className="text-xs font-mono font-bold text-[#e01a76]">{step.num}</span>
+              <span className="text-xs font-mono font-bold text-yellow-600">{step.num}</span>
               <h3 className="text-xs font-bold text-slate-900">{step.title}</h3>
               <p className="text-[11px] text-slate-500 leading-relaxed">{step.desc}</p>
             </div>
@@ -95,8 +95,8 @@ export const ClinicPage: React.FC<ClinicPageProps> = ({ onOpenBookEyeTest, onNav
       <section className="bg-[#121217] text-white rounded-3xl p-8 sm:p-12 border border-slate-800">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div className="lg:col-span-8 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#e01a76] uppercase tracking-wider">
-              <ShieldCheck className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs font-bold text-yellow-500 uppercase tracking-wider">
+              <ShieldCheck className="w-4 h-4 text-yellow-500" />
               <span>30-DAY ZERO-RISK ADAPTATION GUARANTEE</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">
@@ -110,7 +110,7 @@ export const ClinicPage: React.FC<ClinicPageProps> = ({ onOpenBookEyeTest, onNav
           <div className="lg:col-span-4 flex justify-start lg:justify-end">
             <button
               onClick={onOpenBookEyeTest}
-              className="py-3.5 px-6 bg-[#e01a76] hover:bg-[#b7005d] text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md"
+              className="py-3.5 px-6 bg-yellow-500 hover:bg-yellow-400 text-slate-950 text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-md"
             >
               BOOK CLINICAL CONSULTATION
             </button>

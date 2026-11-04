@@ -46,7 +46,7 @@ export const UserAccountDrawer: React.FC = () => {
           {/* Header */}
           <div className="p-4 sm:p-6 border-b border-white/10 bg-[#1b1b22] flex items-center justify-between">
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-[#e01a76] to-amber-400 p-0.5 shadow-md">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-yellow-500 to-amber-400 p-0.5 shadow-md">
                 <div className="w-full h-full bg-[#121217] rounded-2xl flex items-center justify-center">
                   <User className="w-4 h-4 sm:w-5 sm:h-5 text-amber-300" />
                 </div>
@@ -82,7 +82,7 @@ export const UserAccountDrawer: React.FC = () => {
               onClick={() => setActiveTab('orders')}
               className={`py-3 px-3 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${
                 activeTab === 'orders'
-                  ? 'border-[#e01a76] text-white'
+                  ? 'border-yellow-500 text-yellow-400 font-bold'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -94,7 +94,7 @@ export const UserAccountDrawer: React.FC = () => {
               onClick={() => setActiveTab('appointments')}
               className={`py-3 px-3 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${
                 activeTab === 'appointments'
-                  ? 'border-[#e01a76] text-white'
+                  ? 'border-yellow-500 text-yellow-400 font-bold'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -106,7 +106,7 @@ export const UserAccountDrawer: React.FC = () => {
               onClick={() => setActiveTab('prescriptions')}
               className={`py-3 px-3 text-xs font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${
                 activeTab === 'prescriptions'
-                  ? 'border-[#e01a76] text-white'
+                  ? 'border-yellow-500 text-yellow-400 font-bold'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -159,7 +159,7 @@ export const UserAccountDrawer: React.FC = () => {
                             })}
                           </span>
                         </div>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#e01a76]/20 text-[#ff4d9e] border border-[#e01a76]/30">
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-300 border border-yellow-500/40">
                           <Clock className="w-3 h-3" />
                           <span>{ord.order_status}</span>
                         </div>
@@ -222,7 +222,7 @@ export const UserAccountDrawer: React.FC = () => {
                       </div>
                       <div className="text-xs text-slate-300 space-y-1">
                         <div className="flex items-center gap-2">
-                          <MapPin className="w-3.5 h-3.5 text-[#e01a76]" />
+                          <MapPin className="w-3.5 h-3.5 text-yellow-500" />
                           <span>{apt.clinic_branch}</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -273,7 +273,7 @@ export const UserAccountDrawer: React.FC = () => {
                           <span className="ml-2">AXIS: {rx.right_axis || '0'}°</span>
                         </div>
                         <div>
-                          <span className="text-[#e01a76] block font-bold">Left Eye (OS):</span>
+                          <span className="text-yellow-400 block font-bold">Left Eye (OS):</span>
                           <span>SPH: {rx.left_sphere || '0.00'}</span>
                           <span className="ml-2">CYL: {rx.left_cylinder || '0.00'}</span>
                           <span className="ml-2">AXIS: {rx.left_axis || '0'}°</span>
@@ -310,14 +310,14 @@ export const UserAccountDrawer: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400">SQL Schema:</span>
-                      <span className="text-[#e01a76]">/supabase/schema.sql</span>
+                      <span className="text-yellow-400">/supabase/schema.sql</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-4 bg-[#1b1b22] rounded-2xl border border-white/10 space-y-2.5 text-xs text-slate-300">
                   <h5 className="font-semibold text-white flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#e01a76]" />
+                    <ShieldCheck className="w-4 h-4 text-yellow-400" />
                     <span>How to connect your live Supabase project:</span>
                   </h5>
                   <ol className="list-decimal list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">

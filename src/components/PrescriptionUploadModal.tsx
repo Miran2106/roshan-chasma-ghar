@@ -82,7 +82,7 @@ export const PrescriptionUploadModal: React.FC<PrescriptionUploadModalProps> = (
         {/* Header */}
         <div className="bg-[#121217] text-white p-5 flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#e01a76] uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-yellow-400 uppercase tracking-wider">
               <Shield className="w-3.5 h-3.5" />
               <span>Certified Lens Surfacing</span>
             </div>
@@ -104,7 +104,7 @@ export const PrescriptionUploadModal: React.FC<PrescriptionUploadModalProps> = (
             onClick={() => setTab('upload')}
             className={`flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-2 border-b-2 transition-all ${
               tab === 'upload'
-                ? 'border-[#e01a76] text-[#e01a76] bg-white'
+                ? 'border-yellow-500 text-yellow-800 bg-white'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -115,7 +115,7 @@ export const PrescriptionUploadModal: React.FC<PrescriptionUploadModalProps> = (
             onClick={() => setTab('manual')}
             className={`flex-1 py-3 text-xs font-semibold flex items-center justify-center gap-2 border-b-2 transition-all ${
               tab === 'manual'
-                ? 'border-[#e01a76] text-[#e01a76] bg-white'
+                ? 'border-yellow-500 text-yellow-800 bg-white'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
@@ -135,10 +135,10 @@ export const PrescriptionUploadModal: React.FC<PrescriptionUploadModalProps> = (
                 onDragLeave={() => setIsDragging(false)}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${
-                  isDragging ? 'border-[#e01a76] bg-pink-50/50' : 'border-slate-300 hover:border-slate-400 bg-slate-50'
+                  isDragging ? 'border-yellow-500 bg-yellow-50/60' : 'border-slate-300 hover:border-slate-400 bg-slate-50'
                 }`}
               >
-                <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mx-auto mb-3 text-[#e01a76]">
+                <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mx-auto mb-3 text-yellow-600">
                   <Upload className="w-6 h-6" />
                 </div>
                 <p className="text-xs font-semibold text-slate-800 mb-1">
@@ -177,7 +177,7 @@ export const PrescriptionUploadModal: React.FC<PrescriptionUploadModalProps> = (
               )}
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-[#e01a76] shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />
                 <p className="text-[11px] text-slate-600 leading-relaxed">
                   Our certified opticians verify every prescription value and pupil distance before grinding lenses. If anything is unclear, we reach out via WhatsApp immediately.
                 </p>
@@ -294,7 +294,7 @@ export const PrescriptionUploadModal: React.FC<PrescriptionUploadModalProps> = (
           <div className="pt-2">
             <button
               onClick={handleSave}
-              className="w-full py-3 px-4 bg-[#e01a76] hover:bg-[#b7005d] text-white font-semibold rounded-xl text-xs transition-colors shadow-md flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold rounded-xl text-xs transition-colors shadow-md flex items-center justify-center gap-2"
             >
               <span>Attach Prescription To Order</span>
             </button>

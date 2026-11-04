@@ -51,7 +51,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
         {/* Left: Visual Frame Showcase */}
         <div className="md:w-1/2 bg-[#f6f2fa] p-8 flex flex-col items-center justify-between border-b md:border-b-0 md:border-r border-slate-200">
           <div className="w-full flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold tracking-widest text-[#e01a76] bg-pink-100/60 px-2.5 py-1 rounded-full">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-yellow-800 bg-yellow-100/80 px-2.5 py-1 rounded-full border border-yellow-200">
               {product.badge || product.series}
             </span>
             <span className="text-xs text-slate-400 font-mono">SKU: {product.sku}</span>
@@ -83,7 +83,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               }}
               className="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
             >
-              <Eye className="w-3.5 h-3.5 text-[#e01a76]" />
+              <Eye className="w-3.5 h-3.5 text-yellow-600" />
               <span>Launch 3D Virtual Try-On</span>
             </button>
           </div>
@@ -117,7 +117,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
               <span className="text-xs text-slate-400 line-through">
                 ₹{(product.originalPrice + lensObj.additionalPrice).toLocaleString()}
               </span>
-              <span className="text-xs font-bold text-[#e01a76] bg-pink-50 px-2 py-0.5 rounded-md">
+              <span className="text-xs font-bold text-yellow-800 bg-yellow-100 px-2 py-0.5 rounded-md border border-yellow-200">
                 SAVE {product.discountPercent}%
               </span>
             </div>
@@ -134,7 +134,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                     onClick={() => setSelectedColor(color.name)}
                     className={`w-7 h-7 rounded-full transition-all flex items-center justify-center ${
                       selectedColor === color.name
-                        ? 'ring-2 ring-offset-2 ring-[#e01a76] scale-105'
+                        ? 'ring-2 ring-offset-2 ring-yellow-500 scale-105'
                         : 'border border-slate-300 hover:scale-105'
                     }`}
                     style={{ backgroundColor: color.hex }}
@@ -176,17 +176,17 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                     onClick={() => setSelectedLens(opt.id)}
                     className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all text-xs ${
                       selectedLens === opt.id
-                        ? 'border-[#e01a76] bg-pink-50/40 text-slate-900 font-medium'
+                        ? 'border-yellow-500 bg-yellow-50/70 text-slate-900 font-medium'
                         : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <div
                         className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                          selectedLens === opt.id ? 'border-[#e01a76] bg-[#e01a76]' : 'border-slate-300'
+                          selectedLens === opt.id ? 'border-yellow-500 bg-yellow-500' : 'border-slate-300'
                         }`}
                       >
-                        {selectedLens === opt.id && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                        {selectedLens === opt.id && <div className="w-1.5 h-1.5 bg-slate-950 rounded-full" />}
                       </div>
                       <span>{opt.title}</span>
                     </div>
@@ -206,7 +206,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 onAddToCart(product, selectedColor, selectedLens);
                 onClose();
               }}
-              className="w-full py-3 bg-[#e01a76] hover:bg-[#b7005d] text-white font-semibold rounded-xl text-xs transition-colors shadow-md flex items-center justify-center gap-2"
+              className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold rounded-xl text-xs transition-colors shadow-md flex items-center justify-center gap-2"
             >
               <span>Add To Optical Bag · ₹{totalPrice.toLocaleString()}</span>
             </button>
@@ -215,7 +215,7 @@ export const QuickViewModal: React.FC<QuickViewModalProps> = ({
                 onClose();
                 onViewProductDetail(product);
               }}
-              className="w-full py-2 text-center text-xs text-slate-600 hover:text-[#e01a76] font-medium flex items-center justify-center gap-1"
+              className="w-full py-2 text-center text-xs text-slate-600 hover:text-yellow-600 font-medium flex items-center justify-center gap-1"
             >
               <span>View Full Technical Specifications & Craft Story</span>
               <ArrowRight className="w-3.5 h-3.5" />

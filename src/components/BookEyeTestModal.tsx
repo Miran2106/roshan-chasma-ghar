@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, Calendar, Clock, MapPin, Sparkles, User, Phone, ShieldCheck, Database } from 'lucide-react';
 import { bookEyeTest } from '../services/supabaseService';
 import { useAuth } from '../context/AuthContext';
 import { BRAND_LOGO_IMAGE } from '../data/products';
+import { getStoreSettings, StoreSettings } from '../types/storeSettings';
 
 interface BookEyeTestModalProps {
   isOpen: boolean;
@@ -10,16 +11,23 @@ interface BookEyeTestModalProps {
 }
 
 export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onClose }) => {
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(getStoreSettings());
   const [step, setStep] = useState<'form' | 'confirmed'>('form');
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
     service: '14-Point Comprehensive Computerized Exam',
-    location: 'Flagship Atelier - Central Promenade (400001)',
+    location: `${getStoreSettings().storeName} - Flagship Atelier (${getStoreSettings().pincode})`,
     date: '2026-09-28',
     time: '11:30 AM',
     notes: '',
   });
+
+  useEffect(() => {
+    const handleUpdate = () => setStoreSettings(getStoreSettings());
+    window.addEventListener('store_settings_updated', handleUpdate);
+    return () => window.removeEventListener('store_settings_updated', handleUpdate);
+  }, []);
 
   const [bookingRef, setBookingRef] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,7 +119,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
               <select
                 value={formData.service}
                 onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white transition-all"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white transition-all"
               >
                 <option value="14-Point Comprehensive Computerized Exam">14-Point Comprehensive Computerized Exam (₹0 - Complimentary)</option>
                 <option value="Zeiss Wavefront Progressive Adaptation">Zeiss Wavefront Progressive Adaptation & Axis Mapping</option>
@@ -128,17 +136,17 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, location: 'Flagship Atelier - Central Promenade (400001)' })}
+                  onClick={() => setFormData({ ...formData, location: `${storeSettings.storeName} Flagship Atelier (${storeSettings.pincode})` })}
                   className={`p-3 text-left rounded-xl border text-xs font-medium transition-all flex flex-col gap-1 ${
-                    formData.location.includes('Flagship')
-                      ? 'border-[#e01a76] bg-pink-50/50 text-[#e01a76]'
+                    formData.location.includes('Flagship') || formData.location.includes(storeSettings.storeName)
+                      ? 'border-yellow-500 bg-yellow-50 text-yellow-900'
                       : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                   }`}
                 >
                   <span className="font-semibold flex items-center gap-1.5 text-slate-900">
-                    <MapPin className="w-3.5 h-3.5 text-[#e01a76]" /> In-Clinic Examination
+                    <MapPin className="w-3.5 h-3.5 text-yellow-600" /> In-Clinic Examination
                   </span>
-                  <span className="text-slate-500 text-[11px]">Main Market Optical Avenue, Flagship Lab</span>
+                  <span className="text-slate-500 text-[11px] truncate">{storeSettings.shortAddress}</span>
                 </button>
 
                 <button
@@ -146,12 +154,12 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
                   onClick={() => setFormData({ ...formData, location: 'Doorstep Optometrist Visit (Home / Office)' })}
                   className={`p-3 text-left rounded-xl border text-xs font-medium transition-all flex flex-col gap-1 ${
                     formData.location.includes('Doorstep')
-                      ? 'border-[#e01a76] bg-pink-50/50 text-[#e01a76]'
+                      ? 'border-yellow-500 bg-yellow-50 text-yellow-900'
                       : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
                   }`}
                 >
                   <span className="font-semibold flex items-center gap-1.5 text-slate-900">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#e01a76]" /> Doorstep Optometrist
+                    <ShieldCheck className="w-3.5 h-3.5 text-yellow-600" /> Doorstep Optometrist
                   </span>
                   <span className="text-slate-500 text-[11px]">Certified specialist brings portable digital phoropter</span>
                 </button>
@@ -169,7 +177,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
                   required
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                 />
               </div>
 
@@ -180,7 +188,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
                 <select
                   value={formData.time}
                   onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                 >
                   <option value="10:30 AM">10:30 AM (Morning)</option>
                   <option value="11:30 AM">11:30 AM (Morning)</option>
@@ -203,7 +211,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
                   placeholder="e.g. Roshan Patel"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                 />
               </div>
 
@@ -217,7 +225,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
                   placeholder="+91 98765 43210"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
                 />
               </div>
             </div>
@@ -232,7 +240,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
                 placeholder="Current power changes, night glare issues, bifocal questions..."
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#e01a76] focus:bg-white"
+                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-yellow-500 focus:bg-white"
               />
             </div>
 
@@ -240,7 +248,7 @@ export const BookEyeTestModal: React.FC<BookEyeTestModalProps> = ({ isOpen, onCl
             <div className="pt-2">
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 bg-[#e01a76] hover:bg-[#b7005d] text-white font-semibold rounded-xl text-sm shadow-md hover:shadow-lg transition-all"
+                className="w-full py-3.5 px-4 bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold rounded-xl text-sm shadow-md hover:shadow-lg transition-all"
               >
                 Confirm Clinical Appointment
               </button>
